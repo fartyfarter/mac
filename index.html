@@ -236,10 +236,40 @@
         // Set Firebase Log Level to Debug
         setLogLevel('Debug');
 
-        // --- GLOBAL VARIABLES ---
+        // --- USER CONFIGURATION SECTION ---
+        // NOTE: When deploying to GitHub Pages or running locally, you MUST replace the placeholder 
+        // configuration below with your actual Firebase project configuration.
+        // Get this from your Firebase project settings (Web app).
+        const GITHUB_FIREBASE_CONFIG = {
+            apiKey: "YOUR_API_KEY_HERE", // e.g., "AIzaSy..."
+            authDomain: "YOUR_AUTH_DOMAIN_HERE", // e.g., "macobfuscator.firebaseapp.com"
+            projectId: "YOUR_PROJECT_ID_HERE", // e.g., "macobfuscator"
+            storageBucket: "YOUR_STORAGE_BUCKET_HERE",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID_HERE",
+            appId: "YOUR_APP_ID_HERE"
+        };
+        
+        // Replace this with your actual Discord Webhook URL
+        const GITHUB_WEBHOOK_URL = 'https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN';
+
+
+        // --- GLOBAL VARIABLES (Prioritize Canvas, then Fallback for GitHub Pages) ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const isCanvasEnvironment = typeof __firebase_config !== 'undefined' && __firebase_config !== '{}';
+
+        let firebaseConfig;
+        let WEBHOOK_URL;
+
+        if (isCanvasEnvironment) {
+            // Running inside the secure Canvas environment
+            firebaseConfig = JSON.parse(__firebase_config);
+            WEBHOOK_URL = 'https://discord.com/api/webhooks/1441754194007687169/Z4ugIucE_4GOGaEk1lRog1gpRVYS2st-KWZVuVHy9mwouFxZ9z5deZYMJ-OPo3ovapao'; // Original hardcoded, assume it works for Canvas
+        } else {
+            // Running outside Canvas (e.g., GitHub Pages)
+            firebaseConfig = GITHUB_FIREBASE_CONFIG;
+            WEBHOOK_URL = GITHUB_WEBHOOK_URL;
+        }
         
         let app, db, auth;
         let userId = null;
@@ -277,9 +307,6 @@
         const currentUserIdElement = document.getElementById('current-user-id');
         const userPendingView = document.getElementById('user-pending-view');
         const userAcceptedView = document.getElementById('user-accepted-view');
-
-        // The webhook URL
-        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1441754194007687169/Z4ugIucE_4GOGaEk1lRog1gpRVYS2st-KWZVuVHy9mwouFxZ9z5deZYMJ-OPo3ovapao';
 
 
         // --- UTILITY FUNCTIONS ---
@@ -342,6 +369,18 @@
          * Initializes Firebase and sets up the auth listener.
          */
         async function initializeFirebase() {
+            // Check if we have a valid projectId (minimum requirement for initialization)
+            if (!firebaseConfig.projectId || firebaseConfig.projectId.includes("YOUR_PROJECT_ID_HERE")) {
+                console.error("Firebase configuration missing. Cannot initialize Firebase features.");
+                isAuthReady = true; // Mark as ready but non-functional
+                updateAccessUI(null); // Show guest view
+                showModal(
+                    "Configuration Error", 
+                    "The Firebase project configuration is missing. Please edit the script to add your `firebaseConfig` and `WEBHOOK_URL` if running outside the Canvas environment (e.g., GitHub Pages)."
+                );
+                return; 
+            }
+            
             try {
                 if (!app) {
                     app = initializeApp(firebaseConfig);
@@ -350,7 +389,7 @@
                 }
 
                 // Sign in anonymously or with custom token
-                if (initialAuthToken) {
+                if (initialAuthToken && isCanvasEnvironment) {
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
                     await signInAnonymously(auth);
@@ -376,7 +415,7 @@
 
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
-                showModal("Initialization Error", "Failed to connect to the database. Check console for details.");
+                showModal("Initialization Error", `Failed to connect to the database. Error: ${error.message}.`);
             }
         }
         
@@ -431,6 +470,7 @@
          */
         function setupUserProfileListener(uid) {
             cleanupUserProfileListener();
+            if (!db) return; // Guard against uninitialized db
 
             const userDocRef = doc(db, `artifacts/${appId}/users/${uid}/profiles/main`);
             
@@ -456,6 +496,8 @@
          * Handles the sign-up process: username validation and profile creation.
          */
         async function handleSignup() {
+            if (!auth || !db) return showModal("Error", "Database service is not initialized. Please check configuration.");
+            
             const username = usernameInput.value.trim();
             signupErrorMessage.classList.add('hidden');
             
@@ -509,7 +551,7 @@
          * Toggles the user's acceptance status (for the dev button).
          */
         async function toggleAcceptance(isAccepted) {
-            if (!userId) return;
+            if (!userId || !db) return;
 
             try {
                 const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/profiles/main`);
@@ -529,6 +571,7 @@
          * Logs the user out of the application.
          */
         async function handleLogout() {
+            if (!auth) return;
             try {
                 await signOut(auth);
                 // Auth listener handles UI update
@@ -547,6 +590,13 @@
          * @param {string} username - The username of the requester.
          */
         async function sendWebhook(buttonId, username) {
+            if (!userId) {
+                return showModal("Access Error", "Cannot send request: User ID not available. Please sign up first.");
+            }
+            if (!WEBHOOK_URL || WEBHOOK_URL.includes("YOUR_WEBHOOK_ID")) {
+                return showModal("Webhook Error", "The Discord Webhook URL is not configured. Please edit the script to add your URL.");
+            }
+            
             const button = document.getElementById(buttonId);
             
             button.textContent = 'Sending...';
@@ -554,10 +604,6 @@
             
             // Build the Admin Acceptance URL
             const adminAcceptUrl = `${window.location.origin}${window.location.pathname}?admin_accept=true&uid=${userId}`;
-
-            const content = username 
-                ? `**ACCESS REQUESTED:** User **${username}** (UID: \`${userId}\`) has requested access.`
-                : `**ACCESS REQUESTED:** An anonymous guest has clicked the access button.`;
                 
             // Use Discord Embeds for a cleaner, actionable message
             const payload = {
@@ -591,9 +637,12 @@
                         `Your request was successfully submitted to the admin team via Discord. They can now use the admin link in Discord to accept you.`
                     );
                 } else {
+                    // Detailed error reporting for non-200/204 status
+                    const errorText = await response.text();
+                    console.error(`Webhook failed. Status: ${response.status}. Body: ${errorText}`);
                     showModal(
                         "Request Failed (Server Error)",
-                        `The webhook failed with status ${response.status}.`
+                        `The webhook failed with status ${response.status}. Please check your Webhook URL configuration.`
                     );
                 }
 
@@ -601,7 +650,7 @@
                 console.error('Webhook Fetch Error:', error);
                 showModal(
                     "Request Failed (Client Error)",
-                    `A network error occurred. Please try again. (Console details available)`
+                    `A network error occurred. Please check your console and network connection.`
                 );
             } finally {
                 // Determine which button to reset (based on if the user is signed in)
@@ -623,7 +672,7 @@
          */
         function updateAccessUI(profile) {
             // Determine the current view
-            const isLoggedIn = !!auth.currentUser;
+            const isLoggedIn = !!auth?.currentUser; // Use optional chaining for auth
             const hasProfile = !!profile;
             const isAccepted = profile?.isAccepted === true;
             const username = profile?.username || 'Guest';
@@ -720,6 +769,8 @@
         // Webhook buttons
         accessWebhookButtonGuest.addEventListener('click', () => sendWebhook(accessWebhookButtonGuest.id, 'Guest'));
         accessWebhookButtonUser.addEventListener('click', async () => {
+            if (!db || !userId) return showModal("Error", "Database or User ID not available.");
+            
             const profileSnap = await getDoc(doc(db, `artifacts/${appId}/users/${userId}/profiles/main`));
             const username = profileSnap.data()?.username || 'Signed-in User';
             sendWebhook(accessWebhookButtonUser.id, username);
