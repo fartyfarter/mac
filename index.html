@@ -215,8 +215,6 @@
     </div>
 
     <script type="module">
-        // Removed all Firebase imports
-
         // --- LOCAL STORAGE KEYS ---
         const CURRENT_USER_KEY = 'macobf_current_user';
         const REGISTERED_USERNAMES_KEY = 'macobf_registered_usernames';
@@ -261,7 +259,8 @@
          * @returns {string}
          */
         function generateLocalId() {
-            return 'local-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
+            // Using crypto.randomUUID for a more standard, unique ID if available, falling back to a timestamp/random string.
+            return (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('local-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 9));
         }
 
         /**
@@ -375,6 +374,13 @@
                 signupErrorMessage.classList.remove('hidden');
                 return;
             }
+            // Simple length validation
+            if (username.length < 3 || username.length > 20) {
+                 signupErrorMessage.textContent = 'Username must be between 3 and 20 characters.';
+                signupErrorMessage.classList.remove('hidden');
+                return;
+            }
+
             if (isProfane(username)) {
                 signupErrorMessage.textContent = 'Username contains offensive language.';
                 signupErrorMessage.classList.remove('hidden');
@@ -546,10 +552,8 @@
             // Start local state loading and show the default tab
             initializeLocalState();
             
-            // Wait a very small delay (50ms) to ensure the initial 'About' content animates in
-            setTimeout(() => {
-                switchTab('about');
-            }, 50); 
+            // Show the default tab immediately (removed redundant timeout)
+            switchTab('about'); 
         });
 
     </script>
