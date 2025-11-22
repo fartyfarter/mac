@@ -127,39 +127,26 @@
             <div id="content-access" class="tab-content hidden text-center">
                 <div id="access-guest-view">
                     <h2 class="text-3xl font-bold mb-8 text-white">Welcome, Guest!</h2>
-                    <p class="text-gray-400 mb-6">You need to sign up to request access and view the Obfuscator tab.</p>
-                    <div class="flex justify-center space-x-4">
-                        <button id="sign-up-button" class="bg-indigo-600 text-white font-bold text-lg py-3 px-8 rounded-xl shadow-lg transition duration-300 transform hover:scale-105 hover:bg-indigo-700">
-                            Sign Up
-                        </button>
-                        <button id="access-webhook-button" class="bg-white text-black font-extrabold text-lg py-3 px-8 rounded-xl shadow-lg transition duration-300 transform hover:scale-105 hover:shadow-white/50">
-                            Get Access
+                    <p class="text-gray-400 mb-6">Sign up now to get instant access to the Obfuscator tab.</p>
+                    <div class="flex justify-center">
+                        <button id="sign-up-button-guest" class="bg-indigo-600 text-white font-bold text-lg py-3 px-8 rounded-xl shadow-lg transition duration-300 transform hover:scale-105 hover:bg-indigo-700">
+                            Sign Up & Get Instant Access
                         </button>
                     </div>
                 </div>
 
                 <div id="access-user-view" class="hidden">
                     <h2 class="text-3xl font-bold mb-4 text-white">Welcome, <span id="current-username" class="text-indigo-400">User</span>!</h2>
-                    <p id="user-status-message" class="text-lg mb-6"></p>
 
-                    <!-- User Accepted View -->
-                    <div id="user-accepted-view" class="hidden">
-                        <h3 class="text-xl font-semibold mb-4 text-green-400">🎉 Access Granted!</h3>
-                        <p class="text-gray-300 mb-8">You can now use the Obfuscator tab. Your session is active.</p>
+                    <!-- User Accepted View (This view is now the default when a profile exists) -->
+                    <div id="user-accepted-view">
+                        <h3 class="text-xl font-semibold mb-4 text-green-400">🎉 Access Granted Instantly!</h3>
+                        <p class="text-gray-300 mb-8">You can now use the Obfuscator tab.</p>
                     </div>
 
-                    <!-- User Not Accepted View (Default) -->
-                    <div id="user-pending-view">
-                        <p class="text-gray-300 mb-8">Your access request is currently under review. Click 'Re-send Access Request' to send an alert to the admin team.</p>
-                        <button id="access-webhook-button-signedin" class="bg-white text-black font-extrabold text-lg py-3 px-8 rounded-xl shadow-lg transition duration-300 transform hover:scale-105 hover:shadow-white/50 mb-4">
-                            Re-send Access Request
-                        </button>
-                        <!-- Simulation Button for Acceptance (Dev only) -->
-                        <button id="manual-accept-button" class="bg-green-600 text-white font-bold text-lg py-3 px-8 rounded-xl shadow-lg transition duration-300 transform hover:scale-105 hover:bg-green-700">
-                            Manually Accept (Dev)
-                        </button>
-                    </div>
-
+                    <!-- User Pending View (Hidden, as acceptance is instant on signup) -->
+                    <div id="user-pending-view" class="hidden"></div>
+                    
                     <p class="text-sm text-gray-500 mt-6 mb-4">User ID: <span id="current-user-id"></span></p>
 
                     <button id="logout-button" class="bg-red-600 text-white font-semibold text-base py-2 px-6 rounded-lg transition duration-300 hover:bg-red-700">
@@ -249,9 +236,7 @@
             appId: "YOUR_APP_ID_HERE"
         };
         
-        // Replace this with your actual Discord Webhook URL
-        const GITHUB_WEBHOOK_URL = 'https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN';
-
+        // Removed: GITHUB_WEBHOOK_URL constant
 
         // --- GLOBAL VARIABLES (Prioritize Canvas, then Fallback for GitHub Pages) ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -259,16 +244,13 @@
         const isCanvasEnvironment = typeof __firebase_config !== 'undefined' && __firebase_config !== '{}';
 
         let firebaseConfig;
-        let WEBHOOK_URL;
 
         if (isCanvasEnvironment) {
             // Running inside the secure Canvas environment
             firebaseConfig = JSON.parse(__firebase_config);
-            WEBHOOK_URL = 'https://discord.com/api/webhooks/1441754194007687169/Z4ugIucE_4GOGaEk1lRog1gpRVYS2st-KWZVuVHy9mwouFxZ9z5deZYMJ-OPo3ovapao'; // Original hardcoded, assume it works for Canvas
         } else {
             // Running outside Canvas (e.g., GitHub Pages)
             firebaseConfig = GITHUB_FIREBASE_CONFIG;
-            WEBHOOK_URL = GITHUB_WEBHOOK_URL;
         }
         
         let app, db, auth;
@@ -290,15 +272,15 @@
         const closeModalButton = document.getElementById('close-modal');
 
         const signupModal = document.getElementById('signup-modal');
-        const signupButton = document.getElementById('sign-up-button');
+        // Updated button ID for guest signup
+        const signupButtonGuest = document.getElementById('sign-up-button-guest'); 
         const closeSignupModalButton = document.getElementById('close-signup-modal');
         const usernameInput = document.getElementById('username-input');
         const submitSignupButton = document.getElementById('submit-signup');
         const signupErrorMessage = document.getElementById('signup-error-message');
 
-        const accessWebhookButtonGuest = document.getElementById('access-webhook-button');
-        const accessWebhookButtonUser = document.getElementById('access-webhook-button-signedin');
-        const manualAcceptButton = document.getElementById('manual-accept-button');
+        // Removed: accessWebhookButtonGuest, accessWebhookButtonUser
+        // Removed: manualAcceptButton
         const logoutButton = document.getElementById('logout-button');
 
         const accessGuestView = document.getElementById('access-guest-view');
@@ -376,7 +358,7 @@
                 updateAccessUI(null); // Show guest view
                 showModal(
                     "Configuration Error", 
-                    "The Firebase project configuration is missing. Please edit the script to add your `firebaseConfig` and `WEBHOOK_URL` if running outside the Canvas environment (e.g., GitHub Pages)."
+                    "The Firebase project configuration is missing. Please edit the script to add your `firebaseConfig` if running outside the Canvas environment (e.g., GitHub Pages)."
                 );
                 return; 
             }
@@ -401,8 +383,7 @@
                     isAuthReady = true;
                     console.log('Auth State Changed. User ID:', userId);
 
-                    // Handle admin acceptance check first, as it's an external trigger
-                    handleAdminAcceptance();
+                    // Removed: handleAdminAcceptance() as it relies on webhook/external links
 
                     if (user) {
                         setupUserProfileListener(userId);
@@ -419,49 +400,7 @@
             }
         }
         
-        /**
-         * Handles acceptance logic triggered externally via the admin link in the webhook.
-         * This runs on page load if the URL contains the admin parameters.
-         */
-        async function handleAdminAcceptance() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const adminAccept = urlParams.get('admin_accept');
-            const targetUid = urlParams.get('uid');
-
-            if (adminAccept === 'true' && targetUid) {
-                console.log(`Admin acceptance link detected for UID: ${targetUid}`);
-
-                // 1. Clean the URL immediately to prevent re-triggering on refresh
-                history.replaceState(null, '', window.location.pathname);
-                
-                try {
-                    // Use a dedicated doc reference for the target user
-                    const userDocRef = doc(db, `artifacts/${appId}/users/${targetUid}/profiles/main`);
-                    const userSnap = await getDoc(userDocRef);
-
-                    if (userSnap.exists()) {
-                        await setDoc(userDocRef, { isAccepted: true }, { merge: true });
-                        
-                        const username = userSnap.data().username || 'a user';
-                        
-                        // Show a special modal confirming the action
-                        showModal(
-                            "✅ User Accepted!", 
-                            `You have granted access to **${username}** (UID: ${targetUid}). <br><br>The user can now see the Obfuscator tab.`
-                        );
-                    } else {
-                         showModal(
-                            "User Not Found", 
-                            `Could not find a profile for UID: ${targetUid}. Acceptance failed.`
-                        );
-                    }
-
-                } catch (error) {
-                    console.error("External Acceptance Failed:", error);
-                    showModal("Error", "Failed to update user profile in Firestore. Check security rules or console.");
-                }
-            }
-        }
+        // Removed: handleAdminAcceptance function (no longer needed for local acceptance)
 
 
         /**
@@ -494,6 +433,7 @@
 
         /**
          * Handles the sign-up process: username validation and profile creation.
+         * Profile is now created with INSTANT acceptance.
          */
         async function handleSignup() {
             if (!auth || !db) return showModal("Error", "Database service is not initialized. Please check configuration.");
@@ -523,13 +463,13 @@
                     return;
                 }
 
-                // 2. Create the user profile
+                // 2. Create the user profile with INSTANT acceptance
                 const uid = auth.currentUser.uid;
                 const userDocRef = doc(db, `artifacts/${appId}/users/${uid}/profiles/main`);
                 
                 await setDoc(userDocRef, {
                     username: username,
-                    isAccepted: false,
+                    isAccepted: true, // <-- INSTANT ACCEPTANCE
                     joinedAt: new Date().toISOString()
                 });
                 
@@ -537,7 +477,7 @@
                 await setDoc(usernameRef, { uid: uid });
 
                 toggleSignupModal(false);
-                showModal("Success!", `Welcome, ${username}! You are signed up. Your access request is pending.`);
+                showModal("Success!", `Welcome, ${username}! Access has been granted instantly.`);
                 // The onSnapshot listener will update the UI automatically.
 
             } catch (error) {
@@ -548,7 +488,7 @@
         }
         
         /**
-         * Toggles the user's acceptance status (for the dev button).
+         * Toggles the user's acceptance status (now only useful for manual dev/testing or future use).
          */
         async function toggleAcceptance(isAccepted) {
             if (!userId || !db) return;
@@ -582,87 +522,7 @@
             }
         }
 
-        // --- WEBHOOK FUNCTION ---
-
-        /**
-         * Attempts to send a POST request to the Discord webhook.
-         * @param {string} buttonId - The ID of the button to update its state.
-         * @param {string} username - The username of the requester.
-         */
-        async function sendWebhook(buttonId, username) {
-            if (!userId) {
-                return showModal("Access Error", "Cannot send request: User ID not available. Please sign up first.");
-            }
-            if (!WEBHOOK_URL || WEBHOOK_URL.includes("YOUR_WEBHOOK_ID")) {
-                return showModal("Webhook Error", "The Discord Webhook URL is not configured. Please edit the script to add your URL.");
-            }
-            
-            const button = document.getElementById(buttonId);
-            
-            button.textContent = 'Sending...';
-            button.disabled = true;
-            
-            // Build the Admin Acceptance URL
-            const adminAcceptUrl = `${window.location.origin}${window.location.pathname}?admin_accept=true&uid=${userId}`;
-                
-            // Use Discord Embeds for a cleaner, actionable message
-            const payload = {
-                username: 'Macobfuscator Access Bot',
-                embeds: [{
-                    title: "🔔 NEW ACCESS REQUEST PENDING",
-                    description: `A signed-up user is requesting access to the Macobfuscator service.`,
-                    color: 3447003, // Blue color
-                    fields: [
-                        { name: "Username", value: username, inline: true },
-                        { name: "User ID (UID)", value: userId, inline: true },
-                        { name: "Action", value: `[✅ Click Here to ACCEPT User](${adminAcceptUrl})`, inline: false }
-                    ],
-                    footer: {
-                        text: "Clicking the link will instantly grant access via Firestore."
-                    },
-                    timestamp: new Date().toISOString()
-                }]
-            };
-
-            try {
-                const response = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (response.ok || response.status === 204) {
-                    showModal(
-                        "Access Request Sent!",
-                        `Your request was successfully submitted to the admin team via Discord. They can now use the admin link in Discord to accept you.`
-                    );
-                } else {
-                    // Detailed error reporting for non-200/204 status
-                    const errorText = await response.text();
-                    console.error(`Webhook failed. Status: ${response.status}. Body: ${errorText}`);
-                    showModal(
-                        "Request Failed (Server Error)",
-                        `The webhook failed with status ${response.status}. Please check your Webhook URL configuration.`
-                    );
-                }
-
-            } catch (error) {
-                console.error('Webhook Fetch Error:', error);
-                showModal(
-                    "Request Failed (Client Error)",
-                    `A network error occurred. Please check your console and network connection.`
-                );
-            } finally {
-                // Determine which button to reset (based on if the user is signed in)
-                const resetButton = document.getElementById(buttonId); 
-                if (resetButton.id === 'access-webhook-button') {
-                     resetButton.textContent = 'Get Access';
-                } else {
-                     resetButton.textContent = 'Re-send Access Request';
-                }
-                resetButton.disabled = false;
-            }
-        }
+        // Removed: sendWebhook function
 
         // --- UI RENDER/UPDATE FUNCTIONS ---
 
@@ -683,20 +543,20 @@
                 accessUserView.classList.remove('hidden');
                 currentUserElement.textContent = username;
                 currentUserIdElement.textContent = userId;
+                
+                // Since acceptance is instant, we hide the pending view
+                userPendingView.classList.add('hidden');
+                userAcceptedView.classList.remove('hidden');
             } else {
                 accessGuestView.classList.remove('hidden');
                 accessUserView.classList.add('hidden');
             }
 
-            // 2. Toggle Obfuscator Tab and User Status
+            // 2. Toggle Obfuscator Tab
             if (isAccepted) {
                 tabObfuscator.classList.remove('hidden');
-                userPendingView.classList.add('hidden');
-                userAcceptedView.classList.remove('hidden');
             } else {
                 tabObfuscator.classList.add('hidden');
-                userPendingView.classList.remove('hidden');
-                userAcceptedView.classList.add('hidden');
             }
             
             // If the Obfuscator tab was selected and is now hidden, switch to the About tab
@@ -754,7 +614,8 @@
             if (e.target === generalModal) { hideModal(); }
         });
         
-        signupButton.addEventListener('click', () => toggleSignupModal(true));
+        // Use the updated ID for the guest button
+        signupButtonGuest.addEventListener('click', () => toggleSignupModal(true)); 
         closeSignupModalButton.addEventListener('click', () => toggleSignupModal(false));
         submitSignupButton.addEventListener('click', handleSignup);
         usernameInput.addEventListener('keydown', (e) => {
@@ -763,18 +624,8 @@
 
         logoutButton.addEventListener('click', handleLogout);
         
-        // Manual Acceptance Button (Dev/Simulation)
-        manualAcceptButton.addEventListener('click', () => toggleAcceptance(true));
-
-        // Webhook buttons
-        accessWebhookButtonGuest.addEventListener('click', () => sendWebhook(accessWebhookButtonGuest.id, 'Guest'));
-        accessWebhookButtonUser.addEventListener('click', async () => {
-            if (!db || !userId) return showModal("Error", "Database or User ID not available.");
-            
-            const profileSnap = await getDoc(doc(db, `artifacts/${appId}/users/${userId}/profiles/main`));
-            const username = profileSnap.data()?.username || 'Signed-in User';
-            sendWebhook(accessWebhookButtonUser.id, username);
-        });
+        // Removed: Manual Acceptance Button
+        // Removed: Webhook buttons
 
         // Tab Switching Listeners
         tabButtons.forEach(button => {
@@ -782,7 +633,7 @@
                 const tabId = button.getAttribute('data-tab');
                 // Only allow switching to Obfuscator if the tab is visible
                 if (tabId === 'obfuscator' && tabObfuscator.classList.contains('hidden')) {
-                    showModal("Access Required", "You must be accepted to access the Obfuscator tool.");
+                    showModal("Access Required", "You must sign up to access the Obfuscator tool.");
                     return;
                 }
                 switchTab(tabId);
