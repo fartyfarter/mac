@@ -19,8 +19,8 @@
         }
 
         @keyframes glow-pulse {
-            0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3), 0 8px 32px rgba(0, 0, 0, 0.5); }
-            50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6), 0 8px 32px rgba(0, 0, 0, 0.5); }
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.1), 0 8px 32px rgba(0, 0, 0, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.2), 0 8px 32px rgba(0, 0, 0, 0.5); }
         }
 
         @keyframes slide-in {
@@ -59,7 +59,7 @@
         }
 
         .acrylic-bg {
-            background: linear-gradient(-45deg, #0a0e27, #000000, #1a1a3e, #000000);
+            background: linear-gradient(-45deg, #000000, #1a1a1a, #2d2d2d, #000000);
             background-size: 400% 400%;
             animation: gradient-shift 20s ease infinite;
             min-height: 100vh;
@@ -77,7 +77,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
             background-size: 50px 50px;
             animation: orb-float 20s infinite;
             pointer-events: none;
@@ -85,11 +85,11 @@
         }
 
         .acrylic-card {
-            background: rgba(10, 14, 39, 0.7);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.05);
             animation: glow-pulse 4s ease-in-out infinite;
             position: relative;
             z-index: 10;
@@ -132,7 +132,7 @@
             font-weight: 800;
             letter-spacing: -0.02em;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+            background: linear-gradient(135deg, #fff 0%, #888 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -151,13 +151,13 @@
             width: 100px;
             margin-left: auto;
             margin-right: auto;
-            background: linear-gradient(to right, #6366f1, #8b5cf6);
+            background: linear-gradient(to right, #fff, #888);
             border-radius: 2px;
         }
 
         .tab-navigation {
             display: flex;
-            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             margin-bottom: 2.5rem;
             overflow-x: auto;
             scrollbar-width: none;
@@ -190,7 +190,7 @@
             left: 0;
             width: 0;
             height: 3px;
-            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            background: linear-gradient(90deg, #fff, #888);
             transition: width 300ms ease;
         }
 
@@ -254,8 +254,9 @@
         }
 
         .highlight {
-            color: #a78bfa;
+            color: #fff;
             font-weight: 600;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
 
         .feature-grid {
@@ -266,8 +267,8 @@
         }
 
         .feature-card {
-            background: rgba(99, 102, 241, 0.05);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             padding: 1.5rem;
             border-radius: 0.75rem;
@@ -275,8 +276,8 @@
         }
 
         .feature-card:hover {
-            border-color: rgba(99, 102, 241, 0.5);
-            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
             transform: translateY(-4px);
         }
 
@@ -292,12 +293,12 @@
             min-width: 28px;
         }
 
-        .feature-icon.indigo {
-            color: #818cf8;
+        .feature-icon.white {
+            color: #fff;
         }
 
-        .feature-icon.purple {
-            color: #c084fc;
+        .feature-icon.gray {
+            color: #888;
         }
 
         .feature-text strong {
@@ -306,8 +307,8 @@
         }
 
         .gradient-button {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: #fff;
+            background: linear-gradient(135deg, #fff 0%, #888 100%);
+            color: #000;
             font-weight: 700;
             font-size: 1.25rem;
             padding: 1rem 2.5rem;
@@ -336,7 +337,7 @@
 
         .gradient-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 20px 40px rgba(255, 255, 255, 0.2);
         }
 
         .button-container {
@@ -347,8 +348,8 @@
         }
 
         .secondary-button {
-            background: rgba(55, 65, 81, 0.5);
-            border: 1px solid rgb(75, 85, 99);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: #fff;
             font-weight: 600;
             font-size: 1.125rem;
@@ -359,13 +360,13 @@
         }
 
         .secondary-button:hover {
-            background: rgba(55, 65, 81, 0.8);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .danger-button {
-            background: rgba(220, 38, 38, 0.2);
-            border: 1px solid rgba(239, 68, 68, 0.5);
-            color: #fca5a5;
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: #ff6b6b;
             font-weight: 600;
             font-size: 1.125rem;
             padding: 1rem 2rem;
@@ -375,7 +376,7 @@
         }
 
         .danger-button:hover {
-            background: rgba(220, 38, 38, 0.4);
+            background: rgba(255, 0, 0, 0.2);
         }
 
         .modal-container {
@@ -404,8 +405,8 @@
         }
 
         .modal-content {
-            background: rgba(10, 14, 39, 0.95);
-            border: 1px solid rgba(99, 102, 241, 0.3);
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(20px);
             padding: 2.5rem;
             max-width: 35rem;
@@ -458,8 +459,8 @@
             width: 100%;
             padding: 1rem;
             border-radius: 0.75rem;
-            background: rgba(99, 102, 241, 0.05);
-            border: 1px solid rgba(99, 102, 241, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: #fff;
             font-family: 'Inter', sans-serif;
             transition: all 300ms ease;
@@ -472,12 +473,12 @@
 
         .form-input:focus {
             outline: none;
-            border-color: rgba(99, 102, 241, 0.8);
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
         }
 
         .error-message {
-            color: #f87171;
+            color: #ff6b6b;
             font-size: 1rem;
             margin-top: 0.75rem;
             display: none;
@@ -499,8 +500,8 @@
         }
 
         .success-badge {
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 1rem;
             padding: 1.5rem;
             margin-bottom: 2rem;
@@ -508,7 +509,7 @@
         }
 
         .success-badge h3 {
-            color: #4ade80;
+            color: #fff;
             margin-bottom: 0.75rem;
             font-size: 1.5rem;
         }
@@ -521,21 +522,21 @@
 
         .user-info {
             display: inline-block;
-            background: linear-gradient(to right, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.3));
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.2), rgba(136, 136, 136, 0.2));
             border-radius: 1rem;
             padding: 0.75rem 2rem;
             margin-bottom: 1.5rem;
         }
 
         .user-info p {
-            color: #a78bfa;
+            color: #fff;
             font-weight: 600;
             margin: 0;
             font-size: 1rem;
         }
 
         .accent-text {
-            background: linear-gradient(to right, #818cf8, #c084fc);
+            background: linear-gradient(to right, #fff, #888);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -551,12 +552,12 @@
         .section-divider {
             margin-top: 3rem;
             padding-top: 3rem;
-            border-top: 1px solid rgb(55, 65, 81);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .dev-badge {
-            background: rgba(234, 179, 8, 0.1);
-            border: 1px solid rgba(234, 179, 8, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 1rem;
             padding: 2.5rem;
             margin-bottom: 0;
@@ -574,7 +575,7 @@
         }
 
         .dev-badge h3 {
-            color: #facc15;
+            color: #fff;
             margin: 0;
             font-size: 1.75rem;
         }
@@ -592,8 +593,8 @@
         }
 
         .credit-card {
-            background: rgba(99, 102, 241, 0.05);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             padding: 2rem;
             border-radius: 0.75rem;
@@ -601,8 +602,8 @@
         }
 
         .credit-card:hover {
-            border-color: rgba(99, 102, 241, 0.5);
-            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
             transform: translateY(-4px);
         }
 
@@ -627,8 +628,8 @@
         }
 
         .contact-card {
-            background: rgba(99, 102, 241, 0.05);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             padding: 2.5rem;
             border-radius: 1rem;
@@ -637,8 +638,8 @@
         }
 
         .contact-card:hover {
-            border-color: rgba(99, 102, 241, 0.5);
-            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
             transform: translateY(-4px);
         }
 
@@ -648,8 +649,8 @@
 
         .contact-link {
             display: inline-block;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: #fff;
+            background: linear-gradient(135deg, #fff 0%, #888 100%);
+            color: #000;
             font-weight: 600;
             padding: 0.75rem 2rem;
             border-radius: 0.75rem;
@@ -660,7 +661,7 @@
 
         .contact-link:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
         }
 
         .community-login-prompt {
@@ -683,8 +684,8 @@
             overflow-y: auto;
             margin-bottom: 1.5rem;
             padding: 1.5rem;
-            background: rgba(99, 102, 241, 0.05);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 1rem;
         }
 
@@ -701,7 +702,7 @@
         }
 
         .message-username {
-            color: #818cf8;
+            color: #fff;
             font-weight: 600;
             font-size: 1rem;
         }
@@ -715,8 +716,8 @@
         .message-content {
             color: #d1d5db;
             padding: 1rem;
-            background: rgba(55, 65, 81, 0.5);
-            border-left: 3px solid #6366f1;
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid #fff;
             border-radius: 0.5rem;
             word-wrap: break-word;
             font-size: 1.125rem;
@@ -729,8 +730,8 @@
         }
 
         .admin-user-item {
-            background: rgba(99, 102, 241, 0.05);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 1.5rem;
             border-radius: 0.75rem;
             margin-bottom: 1rem;
@@ -746,9 +747,9 @@
         }
 
         .admin-ban-btn {
-            background: rgba(239, 68, 68, 0.3);
-            border: 1px solid rgba(239, 68, 68, 0.5);
-            color: #fca5a5;
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: #ff6b6b;
             padding: 0.75rem 1.5rem;
             border-radius: 0.5rem;
             cursor: pointer;
@@ -757,12 +758,12 @@
         }
 
         .admin-ban-btn:hover {
-            background: rgba(239, 68, 68, 0.5);
+            background: rgba(255, 0, 0, 0.3);
         }
 
         .announcement-item {
-            background: rgba(234, 179, 8, 0.1);
-            border-left: 4px solid rgba(234, 179, 8, 0.5);
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid rgba(255, 255, 255, 0.3);
             padding: 1rem;
             border-radius: 0.5rem;
             margin-bottom: 1rem;
@@ -815,13 +816,13 @@
         .admin-section {
             margin-bottom: 3rem;
             padding: 2rem;
-            background: rgba(99, 102, 241, 0.03);
+            background: rgba(255, 255, 255, 0.03);
             border-radius: 1rem;
-            border: 1px solid rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .admin-section h3 {
-            border-bottom: 2px solid rgba(99, 102, 241, 0.3);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
             padding-bottom: 1rem;
             margin-bottom: 1.5rem;
         }
@@ -830,7 +831,7 @@
             max-height: 500px;
             overflow-y: auto;
             padding: 1rem;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 0.75rem;
         }
     </style>
@@ -868,7 +869,7 @@
                     <div class="feature-grid">
                         <div class="feature-card">
                             <div class="feature-card-content">
-                                <span class="feature-icon indigo">◆</span>
+                                <span class="feature-icon white">◆</span>
                                 <div class="feature-text">
                                     <strong>Bytecode Virtualization</strong>
                                     <p class="text-sm" style="color: #9ca3af; margin: 0.25rem 0 0 0;">Custom virtualization for maximum difficulty</p>
@@ -877,7 +878,7 @@
                         </div>
                         <div class="feature-card">
                             <div class="feature-card-content">
-                                <span class="feature-icon purple">◆</span>
+                                <span class="feature-icon gray">◆</span>
                                 <div class="feature-text">
                                     <strong>Control-Flow Flattening</strong>
                                     <p class="text-sm" style="color: #9ca3af; margin: 0.25rem 0 0 0;">Advanced mutation techniques</p>
@@ -886,7 +887,7 @@
                         </div>
                         <div class="feature-card">
                             <div class="feature-card-content">
-                                <span class="feature-icon indigo">◆</span>
+                                <span class="feature-icon white">◆</span>
                                 <div class="feature-text">
                                     <strong>String Encryption</strong>
                                     <p class="text-sm" style="color: #9ca3af; margin: 0.25rem 0 0 0;">Protect sensitive data completely</p>
@@ -895,7 +896,7 @@
                         </div>
                         <div class="feature-card">
                             <div class="feature-card-content">
-                                <span class="feature-icon purple">◆</span>
+                                <span class="feature-icon gray">◆</span>
                                 <div class="feature-text">
                                     <strong>Metamorphic Generation</strong>
                                     <p class="text-sm" style="color: #9ca3af; margin: 0.25rem 0 0 0;">Unique output every time</p>
@@ -904,7 +905,7 @@
                         </div>
                         <div class="feature-card">
                             <div class="feature-card-content">
-                                <span class="feature-icon indigo">◆</span>
+                                <span class="feature-icon white">◆</span>
                                 <div class="feature-text">
                                     <strong>Anti-Tamper System</strong>
                                     <p class="text-sm" style="color: #9ca3af; margin: 0.25rem 0 0 0;">Detect tampering automatically</p>
@@ -913,7 +914,7 @@
                         </div>
                         <div class="feature-card">
                             <div class="feature-card-content">
-                                <span class="feature-icon purple">◆</span>
+                                <span class="feature-icon gray">◆</span>
                                 <div class="feature-text">
                                     <strong>Full Compatibility</strong>
                                     <p class="text-sm" style="color: #9ca3af; margin: 0.25rem 0 0 0;">Lua 5.1, 5.2, 5.3, & Luau</p>
@@ -965,15 +966,15 @@
                 <h2>Project Acknowledgements</h2>
                 <div class="credits-grid">
                     <div class="credit-card">
-                        <p class="credit-name" style="color: #818cf8;">aerolive</p>
+                        <p class="credit-name" style="color: #fff;">aerolive</p>
                         <p class="credit-role">Project Concept & Vision</p>
                     </div>
                     <div class="credit-card">
-                        <p class="credit-name" style="color: #c084fc;">INN1T</p>
+                        <p class="credit-name" style="color: #888;">INN1T</p>
                         <p class="credit-role">Design & Artistic Direction</p>
                     </div>
                     <div class="credit-card">
-                        <p class="credit-name" style="color: #818cf8;">Gemini</p>
+                        <p class="credit-name" style="color: #fff;">Gemini</p>
                         <p class="credit-role">Landing Page Development</p>
                     </div>
                 </div>
@@ -1454,7 +1455,7 @@
                 currentUserIdElement.textContent = profile.id;
                 updateCommunityUI(true);
                 
-                // Show admin tab only for aerolive and inn1t
+                // Show admin tab only for aerolive and inn1t when logged in
                 if (isAdmin(username)) {
                     tabAdmin.classList.remove('hidden');
                 } else {
@@ -1464,6 +1465,7 @@
                 accessGuestView.classList.add('visible');
                 accessUserView.classList.remove('visible');
                 updateCommunityUI(false);
+                // Always hide admin tab for logged out users
                 tabAdmin.classList.add('hidden');
             }
 
@@ -1600,7 +1602,7 @@
                 userEl.className = 'admin-user-item';
                 const isBannedStatus = isBanned(user.username);
                 userEl.innerHTML = `
-                    <span class="admin-user-name">${escapeHtml(user.username)}${isBannedStatus ? ' <span style="color: #f87171;">[BANNED]</span>' : ''}</span>
+                    <span class="admin-user-name">${escapeHtml(user.username)}${isBannedStatus ? ' <span style="color: #ff6b6b;">[BANNED]</span>' : ''}</span>
                     <button class="admin-ban-btn" onclick="toggleBanUser('${user.username}')">${isBannedStatus ? 'Unban' : 'Ban'}</button>
                 `;
                 container.appendChild(userEl);
