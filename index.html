@@ -138,13 +138,13 @@
                 <div id="access-user-view" class="hidden">
                     <h2 class="text-3xl font-bold mb-4 text-white">Welcome, <span id="current-username" class="text-indigo-400">User</span>!</h2>
 
-                    <!-- User Accepted View (This view is now the default when a profile exists) -->
+                    <!-- User Accepted View -->
                     <div id="user-accepted-view">
                         <h3 class="text-xl font-semibold mb-4 text-green-400">🎉 Access Granted Instantly!</h3>
                         <p class="text-gray-300 mb-8">You can now use the Obfuscator tab.</p>
                     </div>
 
-                    <!-- User Pending View (Hidden, as acceptance is instant on signup) -->
+                    <!-- User Pending View (Hidden for this local version) -->
                     <div id="user-pending-view" class="hidden"></div>
                     
                     <p class="text-sm text-gray-500 mt-6 mb-4">User ID: <span id="current-user-id"></span></p>
@@ -182,7 +182,7 @@
         </div>
     </div>
 
-    <!-- General Modal for Messages and Webhook Results -->
+    <!-- General Modal for Messages -->
     <div id="general-modal" class="indev-modal-container fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
         <div class="indev-modal-content acrylic-card p-8 max-w-sm w-full rounded-xl text-center">
             <h3 id="modal-header" class="text-3xl font-bold text-white mb-4"></h3>
@@ -215,48 +215,14 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        // Removed all Firebase imports
 
-        // Set Firebase Log Level to Debug
-        setLogLevel('Debug');
+        // --- LOCAL STORAGE KEYS ---
+        const CURRENT_USER_KEY = 'macobf_current_user';
+        const REGISTERED_USERNAMES_KEY = 'macobf_registered_usernames';
 
-        // --- USER CONFIGURATION SECTION ---
-        // NOTE: When deploying to GitHub Pages or running locally, you MUST replace the placeholder 
-        // configuration below with your actual Firebase project configuration.
-        // Get this from your Firebase project settings (Web app).
-        const GITHUB_FIREBASE_CONFIG = {
-            apiKey: "YOUR_API_KEY_HERE", // e.g., "AIzaSy..."
-            authDomain: "YOUR_AUTH_DOMAIN_HERE", // e.g., "macobfuscator.firebaseapp.com"
-            projectId: "YOUR_PROJECT_ID_HERE", // e.g., "macobfuscator"
-            storageBucket: "YOUR_STORAGE_BUCKET_HERE",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID_HERE",
-            appId: "YOUR_APP_ID_HERE"
-        };
-        
-        // Removed: GITHUB_WEBHOOK_URL constant
-
-        // --- GLOBAL VARIABLES (Prioritize Canvas, then Fallback for GitHub Pages) ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        const isCanvasEnvironment = typeof __firebase_config !== 'undefined' && __firebase_config !== '{}';
-
-        let firebaseConfig;
-
-        if (isCanvasEnvironment) {
-            // Running inside the secure Canvas environment
-            firebaseConfig = JSON.parse(__firebase_config);
-        } else {
-            // Running outside Canvas (e.g., GitHub Pages)
-            firebaseConfig = GITHUB_FIREBASE_CONFIG;
-        }
-        
-        let app, db, auth;
-        let userId = null;
-        let isAuthReady = false;
-        let userProfileListener = null;
+        // --- GLOBAL STATE VARIABLES ---
+        let currentUser = null; // Stores the currently "logged in" profile object { id, username, isAccepted }
 
         // Profanity filter (simple list for demonstration)
         const PROFANITY_LIST = ['nude', 'fuck', 'shit', 'cunt', 'piss', 'nigger', 'faggot', 'bitch'];
@@ -272,15 +238,12 @@
         const closeModalButton = document.getElementById('close-modal');
 
         const signupModal = document.getElementById('signup-modal');
-        // Updated button ID for guest signup
         const signupButtonGuest = document.getElementById('sign-up-button-guest'); 
         const closeSignupModalButton = document.getElementById('close-signup-modal');
         const usernameInput = document.getElementById('username-input');
         const submitSignupButton = document.getElementById('submit-signup');
         const signupErrorMessage = document.getElementById('signup-error-message');
 
-        // Removed: accessWebhookButtonGuest, accessWebhookButtonUser
-        // Removed: manualAcceptButton
         const logoutButton = document.getElementById('logout-button');
 
         const accessGuestView = document.getElementById('access-guest-view');
@@ -292,6 +255,40 @@
 
 
         // --- UTILITY FUNCTIONS ---
+
+        /**
+         * Generates a simple unique ID (replaces Firebase UID).
+         * @returns {string}
+         */
+        function generateLocalId() {
+            return 'local-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
+        }
+
+        /**
+         * Retrieves the list of all registered usernames from localStorage.
+         * @returns {string[]}
+         */
+        function getRegisteredUsernames() {
+            try {
+                const storedUsernames = localStorage.getItem(REGISTERED_USERNAMES_KEY);
+                return storedUsernames ? JSON.parse(storedUsernames) : [];
+            } catch (e) {
+                console.error("Error reading usernames from localStorage:", e);
+                return [];
+            }
+        }
+
+        /**
+         * Saves the list of all registered usernames to localStorage.
+         * @param {string[]} usernames
+         */
+        function saveRegisteredUsernames(usernames) {
+            try {
+                localStorage.setItem(REGISTERED_USERNAMES_KEY, JSON.stringify(usernames));
+            } catch (e) {
+                console.error("Error writing usernames to localStorage:", e);
+            }
+        }
 
         /**
          * Shows a general modal with custom content.
@@ -345,99 +342,31 @@
             return PROFANITY_LIST.some(word => lowerUsername.includes(word));
         }
 
-        // --- FIREBASE CORE FUNCTIONS ---
+        // --- CORE LOCAL AUTH FUNCTIONS ---
 
         /**
-         * Initializes Firebase and sets up the auth listener.
+         * Initializes the user session from localStorage.
          */
-        async function initializeFirebase() {
-            // Check if we have a valid projectId (minimum requirement for initialization)
-            if (!firebaseConfig.projectId || firebaseConfig.projectId.includes("YOUR_PROJECT_ID_HERE")) {
-                console.error("Firebase configuration missing. Cannot initialize Firebase features.");
-                isAuthReady = true; // Mark as ready but non-functional
-                updateAccessUI(null); // Show guest view
-                showModal(
-                    "Configuration Error", 
-                    "The Firebase project configuration is missing. Please edit the script to add your `firebaseConfig` if running outside the Canvas environment (e.g., GitHub Pages)."
-                );
-                return; 
-            }
-            
+        function initializeLocalState() {
             try {
-                if (!app) {
-                    app = initializeApp(firebaseConfig);
-                    db = getFirestore(app);
-                    auth = getAuth(app);
-                }
-
-                // Sign in anonymously or with custom token
-                if (initialAuthToken && isCanvasEnvironment) {
-                    await signInWithCustomToken(auth, initialAuthToken);
+                const storedUser = localStorage.getItem(CURRENT_USER_KEY);
+                if (storedUser) {
+                    currentUser = JSON.parse(storedUser);
                 } else {
-                    await signInAnonymously(auth);
+                    currentUser = null;
                 }
-
-                // Set up auth state listener
-                onAuthStateChanged(auth, (user) => {
-                    userId = user ? user.uid : null;
-                    isAuthReady = true;
-                    console.log('Auth State Changed. User ID:', userId);
-
-                    // Removed: handleAdminAcceptance() as it relies on webhook/external links
-
-                    if (user) {
-                        setupUserProfileListener(userId);
-                    } else {
-                        // User logged out, clear UI state
-                        updateAccessUI(null);
-                        cleanupUserProfileListener();
-                    }
-                });
-
             } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                showModal("Initialization Error", `Failed to connect to the database. Error: ${error.message}.`);
+                console.error("Error loading user state from localStorage:", error);
+                currentUser = null;
             }
+            // Update UI immediately based on local state
+            updateAccessUI(currentUser);
         }
         
-        // Removed: handleAdminAcceptance function (no longer needed for local acceptance)
-
-
-        /**
-         * Subscribes to the user's profile document for real-time updates.
-         * @param {string} uid The Firebase user ID.
-         */
-        function setupUserProfileListener(uid) {
-            cleanupUserProfileListener();
-            if (!db) return; // Guard against uninitialized db
-
-            const userDocRef = doc(db, `artifacts/${appId}/users/${uid}/profiles/main`);
-            
-            userProfileListener = onSnapshot(userDocRef, (docSnap) => {
-                const profile = docSnap.exists() ? docSnap.data() : null;
-                updateAccessUI(profile);
-            }, (error) => {
-                console.error("Error listening to user profile:", error);
-            });
-        }
-
-        /**
-         * Unsubscribes the user profile listener.
-         */
-        function cleanupUserProfileListener() {
-            if (userProfileListener) {
-                userProfileListener();
-                userProfileListener = null;
-            }
-        }
-
         /**
          * Handles the sign-up process: username validation and profile creation.
-         * Profile is now created with INSTANT acceptance.
          */
-        async function handleSignup() {
-            if (!auth || !db) return showModal("Error", "Database service is not initialized. Please check configuration.");
-            
+        function handleSignup() {
             const username = usernameInput.value.trim();
             signupErrorMessage.classList.add('hidden');
             
@@ -452,99 +381,68 @@
                 return;
             }
 
-            try {
-                // 1. Check for username uniqueness
-                const usernameRef = doc(db, `artifacts/${appId}/public/data/usernames/${username.toLowerCase()}`);
-                const usernameSnap = await getDoc(usernameRef);
+            // 1. Check for username uniqueness against locally stored list
+            const registeredUsernames = getRegisteredUsernames();
+            const lowerUsername = username.toLowerCase();
 
-                if (usernameSnap.exists()) {
-                    signupErrorMessage.textContent = 'Username is already taken. Please choose another.';
-                    signupErrorMessage.classList.remove('hidden');
-                    return;
-                }
-
-                // 2. Create the user profile with INSTANT acceptance
-                const uid = auth.currentUser.uid;
-                const userDocRef = doc(db, `artifacts/${appId}/users/${uid}/profiles/main`);
-                
-                await setDoc(userDocRef, {
-                    username: username,
-                    isAccepted: true, // <-- INSTANT ACCEPTANCE
-                    joinedAt: new Date().toISOString()
-                });
-                
-                // 3. Reserve the username in the public collection
-                await setDoc(usernameRef, { uid: uid });
-
-                toggleSignupModal(false);
-                showModal("Success!", `Welcome, ${username}! Access has been granted instantly.`);
-                // The onSnapshot listener will update the UI automatically.
-
-            } catch (error) {
-                console.error("Signup failed:", error);
-                signupErrorMessage.textContent = 'Registration failed. See console for details.';
+            if (registeredUsernames.includes(lowerUsername)) {
+                signupErrorMessage.textContent = 'Username is already taken. Please choose another.';
                 signupErrorMessage.classList.remove('hidden');
+                return;
             }
+
+            // 2. Create the user profile with INSTANT acceptance
+            const newUserId = generateLocalId();
+            const newProfile = {
+                id: newUserId,
+                username: username,
+                isAccepted: true, // INSTANT ACCEPTANCE
+                joinedAt: new Date().toISOString()
+            };
+
+            // 3. Save the new profile and update the registered list
+            currentUser = newProfile;
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newProfile));
+            registeredUsernames.push(lowerUsername);
+            saveRegisteredUsernames(registeredUsernames);
+
+            toggleSignupModal(false);
+            showModal("Success!", `Welcome, ${username}! Access has been granted instantly.`);
+            
+            // 4. Update UI
+            updateAccessUI(currentUser);
         }
         
         /**
-         * Toggles the user's acceptance status (now only useful for manual dev/testing or future use).
+         * Logs the user out of the application by clearing local storage session.
          */
-        async function toggleAcceptance(isAccepted) {
-            if (!userId || !db) return;
-
-            try {
-                const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/profiles/main`);
-                await setDoc(userDocRef, { isAccepted: isAccepted }, { merge: true });
-
-                showModal(
-                    isAccepted ? "Access Granted!" : "Access Revoked!",
-                    `User profile updated. The Obfuscator tab is now ${isAccepted ? 'visible' : 'hidden'}.`
-                );
-            } catch (error) {
-                console.error("Failed to update acceptance status:", error);
-                showModal("Error", "Could not change acceptance status in Firestore.");
-            }
+        function handleLogout() {
+            localStorage.removeItem(CURRENT_USER_KEY);
+            currentUser = null;
+            updateAccessUI(null);
+            showModal("Logged Out", "You have successfully logged out.");
         }
-        
-        /**
-         * Logs the user out of the application.
-         */
-        async function handleLogout() {
-            if (!auth) return;
-            try {
-                await signOut(auth);
-                // Auth listener handles UI update
-                showModal("Logged Out", "You have successfully logged out.");
-            } catch (error) {
-                console.error("Logout failed:", error);
-                showModal("Logout Error", "Failed to log out. See console.");
-            }
-        }
-
-        // Removed: sendWebhook function
 
         // --- UI RENDER/UPDATE FUNCTIONS ---
 
         /**
          * Updates the UI based on the user's profile state.
-         * @param {object | null} profile - The user's profile data from Firestore.
+         * @param {object | null} profile - The local user's profile data.
          */
         function updateAccessUI(profile) {
             // Determine the current view
-            const isLoggedIn = !!auth?.currentUser; // Use optional chaining for auth
-            const hasProfile = !!profile;
+            const isLoggedIn = !!profile;
             const isAccepted = profile?.isAccepted === true;
             const username = profile?.username || 'Guest';
 
             // 1. Toggle Access View
-            if (isLoggedIn && hasProfile) {
+            if (isLoggedIn) {
                 accessGuestView.classList.add('hidden');
                 accessUserView.classList.remove('hidden');
                 currentUserElement.textContent = username;
-                currentUserIdElement.textContent = userId;
+                currentUserIdElement.textContent = profile.id;
                 
-                // Since acceptance is instant, we hide the pending view
+                // Since acceptance is instant, we only show the accepted view
                 userPendingView.classList.add('hidden');
                 userAcceptedView.classList.remove('hidden');
             } else {
@@ -559,7 +457,7 @@
                 tabObfuscator.classList.add('hidden');
             }
             
-            // If the Obfuscator tab was selected and is now hidden, switch to the About tab
+            // If the Obfuscator tab was selected and is now hidden (e.g., after logout), switch to the About tab
             if (document.getElementById('content-obfuscator').classList.contains('active') && !isAccepted) {
                 switchTab('about');
             }
@@ -571,7 +469,7 @@
          */
         function switchTab(activeTabId) {
             const newActiveContent = document.getElementById(`content-${activeTabId}`);
-            const currentActiveContent = document.querySelector('.tab-content.active'); // Use .active class instead of :not(.hidden)
+            const currentActiveContent = document.querySelector('.tab-content.active');
             const activeTab = document.getElementById(`tab-${activeTabId}`);
 
             // Update button styles
@@ -614,7 +512,6 @@
             if (e.target === generalModal) { hideModal(); }
         });
         
-        // Use the updated ID for the guest button
         signupButtonGuest.addEventListener('click', () => toggleSignupModal(true)); 
         closeSignupModalButton.addEventListener('click', () => toggleSignupModal(false));
         submitSignupButton.addEventListener('click', handleSignup);
@@ -624,14 +521,11 @@
 
         logoutButton.addEventListener('click', handleLogout);
         
-        // Removed: Manual Acceptance Button
-        // Removed: Webhook buttons
-
         // Tab Switching Listeners
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const tabId = button.getAttribute('data-tab');
-                // Only allow switching to Obfuscator if the tab is visible
+                // Only allow switching to Obfuscator if the tab is visible AND user is logged in
                 if (tabId === 'obfuscator' && tabObfuscator.classList.contains('hidden')) {
                     showModal("Access Required", "You must sign up to access the Obfuscator tool.");
                     return;
@@ -649,8 +543,8 @@
                 content.style.transform = 'translateY(10px)';
             });
             
-            // Start Firebase and show the default tab
-            initializeFirebase();
+            // Start local state loading and show the default tab
+            initializeLocalState();
             
             // Wait a very small delay (50ms) to ensure the initial 'About' content animates in
             setTimeout(() => {
