@@ -340,6 +340,43 @@
             box-shadow: 0 20px 40px rgba(255, 255, 255, 0.2);
         }
 
+        .beta-button {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.25rem;
+            padding: 1rem 2.5rem;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+            transition: all 300ms ease;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .beta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 500ms;
+        }
+
+        .beta-button:hover::before {
+            left: 100%;
+        }
+
+        .beta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(255, 107, 53, 0.3);
+        }
+
         .button-container {
             margin-top: 2rem;
             display: flex;
@@ -560,7 +597,7 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 1rem;
             padding: 2.5rem;
-            margin-bottom: 0;
+            margin-bottom: 2rem;
         }
 
         .dev-badge-header {
@@ -584,6 +621,25 @@
             margin: 0.75rem 0 0 0;
             color: #d1d5db;
             font-size: 1.125rem;
+        }
+
+        .beta-section {
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .beta-section h3 {
+            color: #ff6b35;
+            margin-bottom: 1rem;
+        }
+
+        .beta-section p {
+            color: #d1d5db;
+            margin-bottom: 2rem;
         }
 
         .credits-grid {
@@ -967,15 +1023,15 @@
                 <div class="credits-grid">
                     <div class="credit-card">
                         <p class="credit-name" style="color: #fff;">aerolive</p>
-                        <p class="credit-role">Project Concept & Vision, Creator of Macobfuscator</p>
+                        <p class="credit-role">Project Concept & Vision</p>
                     </div>
                     <div class="credit-card">
                         <p class="credit-name" style="color: #888;">INN1T</p>
                         <p class="credit-role">Design & Artistic Direction</p>
                     </div>
                     <div class="credit-card">
-                        <p class="credit-name" style="color: #fff;">Jakon</p>
-                        <p class="credit-role">Retired developer, did most of the job for INN1T</p>
+                        <p class="credit-name" style="color: #fff;">Gemini</p>
+                        <p class="credit-role">Landing Page Development</p>
                     </div>
                 </div>
             </div>
@@ -1025,6 +1081,18 @@
                             <p class="text-sm" style="color: #9ca3af; margin-top: 1rem;">Thank you for your patience! Check back soon for the latest updates.</p>
                         </div>
                     </div>
+                </div>
+
+                <!-- Beta Test Section -->
+                <div class="beta-section">
+                    <h3>🚧 Beta Test Available</h3>
+                    <p>Try out the early beta version of Macobfuscator! This is an experimental release made by INN1T - expect bugs and incomplete features. Your feedback will help shape the final product.</p>
+                    <a href="https://fartyfarter.github.io/MacobfuscatorTesting" target="_blank" class="beta-button">
+                        Beta Test Download
+                    </a>
+                    <p class="text-sm" style="color: #ffa94d; margin-top: 1rem; font-style: italic;">
+                        Note: This is an early beta release. Features may be unstable and subject to change.
+                    </p>
                 </div>
             </div>
 
