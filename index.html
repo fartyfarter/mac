@@ -1,4 +1,52 @@
-<!DOCTYPE html>
+function saveCommunityMessages() {
+            try {
+                localStorage.setItem(COMMUNITY_MESSAGES_KEY, JSON.stringify(communityMessages));
+            } catch (e) {
+                console.error("Error saving messages:", e);
+            }
+        }
+
+        function loadAnnouncements() {
+            try {
+                const stored = localStorage.getItem(ANNOUNCEMENTS_KEY);
+                announcements = stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                announcements = [];
+            }
+        }
+
+        function saveAnnouncements() {
+            try {
+                localStorage.setItem(ANNOUNCEMENTS_KEY, JSON.stringify(announcements));
+            } catch (e) {
+                console.error("Error saving announcements:", e);
+            }
+        }
+
+        function loadBannedUsers() {
+            try {
+                const stored = localStorage.getItem(BANNED_USERS_KEY);
+                bannedUsers = stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                bannedUsers = [];
+            }
+        }
+
+        function saveBannedUsers() {
+            try {
+                localStorage.setItem(BANNED_USERS_KEY, JSON.stringify(bannedUsers));
+            } catch (e) {
+                console.error("Error saving banned users:", e);
+            }
+        }
+
+        function isAdmin(username) {
+            return ADMIN_USERS.includes(username?.toLowerCase());
+        }
+
+        function isBanned(username) {
+            return bannedUsers.includes(username?.toLowerCase());
+        }<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -701,6 +749,51 @@
             gap: 0.5rem;
         }
 
+        .admin-user-item {
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-user-name {
+            color: #d1d5db;
+            font-weight: 500;
+        }
+
+        .admin-ban-btn {
+            background: rgba(239, 68, 68, 0.3);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #fca5a5;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 300ms ease;
+        }
+
+        .admin-ban-btn:hover {
+            background: rgba(239, 68, 68, 0.5);
+        }
+
+        .announcement-item {
+            background: rgba(234, 179, 8, 0.1);
+            border-left: 3px solid rgba(234, 179, 8, 0.5);
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .announcement-text {
+            color: #d1d5db;
+            font-size: 0.875rem;
+            margin: 0;
+        }
+
         .italic {
             font-style: italic;
         }
@@ -750,6 +843,7 @@
                 <button class="tab-button" data-tab="credits">Credits</button>
                 <button class="tab-button" data-tab="contacts">Contacts</button>
                 <button class="tab-button" data-tab="community">Community</button>
+                <button class="tab-button hidden" id="tab-admin" data-tab="admin">Admin</button>
                 <button class="tab-button hidden" id="tab-obfuscator" data-tab="obfuscator">Obfuscator</button>
             </div>
 
@@ -924,6 +1018,34 @@
                 </div>
             </div>
 
+            <!-- Admin Tab -->
+            <div id="content-admin" class="tab-content">
+                <h2>Admin Panel</h2>
+                
+                <div style="margin-bottom: 2rem;">
+                    <h3>Announcements</h3>
+                    <div class="form-group">
+                        <label class="form-label">Create Announcement:</label>
+                        <input type="text" id="announcement-input" placeholder="Type announcement..." class="form-input" style="margin-bottom: 0.5rem;">
+                        <button id="post-announcement-btn" class="gradient-button" style="width: 100%; padding: 0.75rem;">Post Announcement</button>
+                    </div>
+
+                    <div id="announcements-container" style="margin-top: 1rem;">
+                        <h4 style="color: #d1d5db; margin-bottom: 1rem;">Recent Announcements:</h4>
+                        <div id="announcements-list" style="max-height: 300px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid rgba(99, 102, 241, 0.2); padding-top: 2rem;">
+                    <h3>User Management</h3>
+                    <div id="users-list" style="max-height: 400px; overflow-y: auto;"></div>
+                </div>
+
+                <div style="border-top: 1px solid rgba(99, 102, 241, 0.2); padding-top: 2rem;">
+                    <button id="clear-chat-btn" class="danger-button" style="width: 100%; padding: 0.75rem;">Clear Community Chat</button>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -992,13 +1114,21 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        // Constants
         const CURRENT_USER_KEY = 'macobf_current_user';
         const REGISTERED_USERS_KEY = 'macobf_registered_users';
         const COMMUNITY_MESSAGES_KEY = 'macobf_community_messages';
+        const ANNOUNCEMENTS_KEY = 'macobf_announcements';
+        const BANNED_USERS_KEY = 'macobf_banned_users';
+        const ADMIN_USERS = ['aerolive', 'inn1t'];
+        const PROFANITY_LIST = ['nude', 'fuck', 'shit', 'cunt', 'piss', 'nigger', 'faggot', 'bitch'];
 
+        // State
         let currentUser = null;
         let communityMessages = [];
+        let announcements = [];
+        let bannedUsers = [];
 
         const PROFANITY_LIST = ['nude', 'fuck', 'shit', 'cunt', 'piss', 'nigger', 'faggot', 'bitch'];
 
@@ -1300,6 +1430,13 @@
             } else {
                 tabObfuscator.classList.add('hidden');
             }
+
+            const tabAdmin = document.getElementById('tab-admin');
+            if (isAdmin(username)) {
+                tabAdmin.classList.remove('hidden');
+            } else {
+                tabAdmin.classList.add('hidden');
+            }
             
             const obfContent = document.getElementById('content-obfuscator');
             if (obfContent.classList.contains('active') && !isAccepted) {
@@ -1312,11 +1449,11 @@
             const chatArea = document.getElementById('community-chat-area');
 
             if (isLoggedIn) {
-                loginPrompt.classList.add('hidden');
+                loginPrompt.style.display = 'none';
                 chatArea.classList.remove('hidden');
                 renderMessages();
             } else {
-                loginPrompt.classList.remove('hidden');
+                loginPrompt.style.display = 'block';
                 chatArea.classList.add('hidden');
             }
         }
@@ -1353,6 +1490,11 @@
 
             if (!message || !currentUser) return;
 
+            if (isBanned(currentUser.username)) {
+                showModal("Banned", "You have been banned from the community chat.");
+                return;
+            }
+
             const now = new Date();
             const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -1366,6 +1508,96 @@
             renderMessages();
             input.value = '';
             input.focus();
+        }
+
+        function postAnnouncement() {
+            const input = document.getElementById('announcement-input');
+            const text = input.value.trim();
+
+            if (!text || !isAdmin(currentUser?.username)) return;
+
+            const now = new Date();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            announcements.unshift({
+                text: text,
+                time: time
+            });
+
+            saveAnnouncements();
+            renderAnnouncements();
+            input.value = '';
+        }
+
+        function renderAnnouncements() {
+            const container = document.getElementById('announcements-list');
+            container.innerHTML = '';
+
+            if (announcements.length === 0) {
+                container.innerHTML = '<p style="color: #9ca3af; font-size: 0.875rem;">No announcements yet.</p>';
+                return;
+            }
+
+            announcements.forEach(ann => {
+                const annEl = document.createElement('div');
+                annEl.className = 'announcement-item';
+                annEl.innerHTML = `
+                    <p class="announcement-text"><strong>${ann.time}</strong> - ${escapeHtml(ann.text)}</p>
+                `;
+                container.appendChild(annEl);
+            });
+        }
+
+        function renderAdminUsersList() {
+            const container = document.getElementById('users-list');
+            container.innerHTML = '';
+
+            const registeredUsers = getRegisteredUsers();
+            const usersList = Object.values(registeredUsers);
+
+            if (usersList.length === 0) {
+                container.innerHTML = '<p style="color: #9ca3af;">No users yet.</p>';
+                return;
+            }
+
+            usersList.forEach(user => {
+                const userEl = document.createElement('div');
+                userEl.className = 'admin-user-item';
+                const isBannedStatus = isBanned(user.username);
+                userEl.innerHTML = `
+                    <span class="admin-user-name">${escapeHtml(user.username)}${isBannedStatus ? ' <span style="color: #f87171;">[BANNED]</span>' : ''}</span>
+                    <button class="admin-ban-btn" onclick="toggleBanUser('${user.username}')">${isBannedStatus ? 'Unban' : 'Ban'}</button>
+                `;
+                container.appendChild(userEl);
+            });
+        }
+
+        function toggleBanUser(username) {
+            const lowerUsername = username.toLowerCase();
+            const index = bannedUsers.indexOf(lowerUsername);
+
+            if (index > -1) {
+                bannedUsers.splice(index, 1);
+                showModal("User Unbanned", `${username} has been unbanned.`);
+            } else {
+                bannedUsers.push(lowerUsername);
+                communityMessages = communityMessages.filter(msg => msg.username.toLowerCase() !== lowerUsername);
+                saveCommunityMessages();
+                showModal("User Banned", `${username} has been banned.`);
+            }
+
+            saveBannedUsers();
+            renderAdminUsersList();
+            renderMessages();
+        }
+
+        function clearCommunityChat() {
+            if (confirm('Are you sure you want to clear all community chat messages? This cannot be undone.')) {
+                communityMessages = [];
+                saveCommunityMessages();
+                renderMessages();
+                showModal("Chat Cleared", "Community chat has been cleared.");
+            }
         }
 
         function switchTab(activeTabId) {
@@ -1429,6 +1661,8 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadCommunityMessages();
+            loadAnnouncements();
+            loadBannedUsers();
             initializeLocalState();
             switchTab('about');
 
@@ -1439,6 +1673,17 @@
             messageInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') sendCommunityMessage();
             });
+
+            const postAnnBtn = document.getElementById('post-announcement-btn');
+            const announcementInput = document.getElementById('announcement-input');
+
+            postAnnBtn.addEventListener('click', postAnnouncement);
+            announcementInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') postAnnouncement();
+            });
+
+            const clearChatBtn = document.getElementById('clear-chat-btn');
+            clearChatBtn.addEventListener('click', clearCommunityChat);
         });
 
     </script>
