@@ -4,228 +4,814 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Macobfuscator - Access & Obfuscator</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Use Inter font family -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* Custom CSS for the animated acrylic black background */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         @keyframes gradient-shift {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
+        @keyframes glow-pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3), 0 8px 32px rgba(0, 0, 0, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6), 0 8px 32px rgba(0, 0, 0, 0.5); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        @keyframes slide-in {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes orb-float {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(30px, -30px); }
+            66% { transform: translate(-20px, 20px); }
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            color: #f3f4f6; /* Light gray text for dark background */
+            color: #f3f4f6;
             background-color: #000;
+            overflow-x: hidden;
         }
 
         .acrylic-bg {
-            /* Subtle dark gradient animation for the background */
-            background: linear-gradient(-45deg, #1c1c1c, #000000, #333333, #000000);
+            background: linear-gradient(-45deg, #0a0e27, #000000, #1a1a3e, #000000);
             background-size: 400% 400%;
-            animation: gradient-shift 15s ease infinite;
+            animation: gradient-shift 20s ease infinite;
             min-height: 100vh;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .acrylic-card {
-            /* Frosted glass effect for the main container */
-            background-color: rgba(255, 255, 255, 0.05); /* Slight white transparency */
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px); /* Blur effect */
-            -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-        }
-        
-        /* CSS for smooth transition when switching tab content */
-        .tab-content {
-            /* Setting transition properties here for the JS to use */
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-            will-change: opacity, transform; /* Optimization */
+        .acrylic-bg::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: orb-float 20s infinite;
+            pointer-events: none;
+            z-index: 0;
         }
 
-        /* --- Modal specific CSS for smooth appearance --- */
-        /* Modal container starts hidden and transparent */
-        .indev-modal-container {
-            opacity: 0;
-            transition: opacity 0.3s ease-out;
+        .acrylic-card {
+            background: rgba(10, 14, 39, 0.7);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            animation: glow-pulse 4s ease-in-out infinite;
+            position: relative;
+            z-index: 10;
         }
-        /* State when modal is active (visible) */
-        .indev-modal-container.is-active {
+
+        .container {
+            margin: 0 auto;
+            padding: 1rem;
+            max-width: 56rem;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 2rem;
+            }
+        }
+
+        #app-container {
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            transition: all 500ms;
+        }
+
+        @media (min-width: 768px) {
+            #app-container {
+                padding: 3rem;
+            }
+        }
+
+        header {
+            margin-bottom: 2.5rem;
+            text-align: center;
+            animation: slide-in 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 3.75rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            font-weight: 300;
+            color: #d1d5db;
+            letter-spacing: 0.05em;
+        }
+
+        .divider {
+            margin-top: 1rem;
+            height: 4px;
+            width: 80px;
+            margin-left: auto;
+            margin-right: auto;
+            background: linear-gradient(to right, #6366f1, #8b5cf6);
+            border-radius: 2px;
+        }
+
+        .tab-navigation {
+            display: flex;
+            border-bottom: 1px solid rgb(55, 65, 81);
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            position: relative;
+            color: #9ca3af;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.125rem;
+            font-weight: 500;
+            transition: color 300ms ease;
+            border: none;
+            background: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .tab-button::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            transition: width 300ms ease;
+        }
+
+        .tab-button.active {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .tab-button.active::after {
+            width: 100%;
+        }
+
+        .tab-content {
+            display: none;
+            animation: slide-in 0.6s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #fff;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        p {
+            color: #d1d5db;
+            line-height: 1.625;
+            font-size: 1.125rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .text-xs {
+            font-size: 0.75rem;
+        }
+
+        .highlight {
+            color: #a78bfa;
+            font-weight: 600;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .feature-card {
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            transition: all 300ms ease;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .feature-card-content {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .feature-icon {
+            font-size: 1.25rem;
+            font-weight: 700;
+            min-width: 24px;
+        }
+
+        .feature-icon.indigo {
+            color: #818cf8;
+        }
+
+        .feature-icon.purple {
+            color: #c084fc;
+        }
+
+        .feature-text strong {
+            color: #fff;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .gradient-button {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.125rem;
+            padding: 0.75rem 2rem;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+            transition: all 300ms ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gradient-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 500ms;
+        }
+
+        .gradient-button:hover::before {
+            left: 100%;
+        }
+
+        .gradient-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.4);
+        }
+
+        .button-container {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .secondary-button {
+            background: rgba(55, 65, 81, 0.5);
+            border: 1px solid rgb(75, 85, 99);
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 300ms ease;
+        }
+
+        .secondary-button:hover {
+            background: rgba(55, 65, 81, 0.8);
+        }
+
+        .danger-button {
+            background: rgba(220, 38, 38, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #fca5a5;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 300ms ease;
+        }
+
+        .danger-button:hover {
+            background: rgba(220, 38, 38, 0.4);
+        }
+
+        .modal-container {
+            opacity: 0;
+            transition: opacity 300ms ease-out;
+            z-index: 50;
+        }
+
+        .modal-container.hidden {
+            display: none;
+        }
+
+        .modal-container.is-active {
             opacity: 1;
         }
 
-        /* Modal content starts slightly scaled down */
-        .indev-modal-content {
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Spring-like easing */
-            transform: scale(0.9);
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
         }
-        /* Modal content scales up when active */
-        .is-active .indev-modal-content {
-            transform: scale(1);
+
+        .modal-content {
+            background: rgba(10, 14, 39, 0.95);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            backdrop-filter: blur(20px);
+            padding: 2rem;
+            max-width: 28rem;
+            width: 100%;
+            border-radius: 1.25rem;
+            transition: transform 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: scale(0.9) translateY(10px);
+            animation: slide-in 400ms ease-out;
+        }
+
+        .modal-container.is-active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .modal-body {
+            color: #d1d5db;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .modal-subtitle {
+            color: #9ca3af;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            color: #d1d5db;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            transition: all 300ms ease;
+        }
+
+        .form-input::placeholder {
+            color: #6b7280;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(99, 102, 241, 0.8);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .error-message {
+            color: #f87171;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .button-group button {
+            flex: 1;
+        }
+
+        .success-badge {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .success-badge h3 {
+            color: #4ade80;
+            margin-bottom: 0.5rem;
+        }
+
+        .success-badge p {
+            color: #d1d5db;
+            margin: 0;
+        }
+
+        .user-info {
+            display: inline-block;
+            background: linear-gradient(to right, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.3));
+            border-radius: 1rem;
+            padding: 0.5rem 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .user-info p {
+            color: #a78bfa;
+            font-weight: 600;
+            margin: 0;
+            font-size: 0.875rem;
+        }
+
+        .accent-text {
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .user-greeting {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-divider {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgb(55, 65, 81);
+        }
+
+        .dev-badge {
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid rgba(234, 179, 8, 0.3);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            margin-bottom: 0;
+        }
+
+        .dev-badge-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .dev-emoji {
+            font-size: 1.875rem;
+        }
+
+        .dev-badge h3 {
+            color: #facc15;
+            margin: 0;
+        }
+
+        .dev-badge p {
+            margin: 0.5rem 0 0 0;
+            color: #d1d5db;
+        }
+
+        .credits-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .credit-card {
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            transition: all 300ms ease;
+        }
+
+        .credit-card:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .credit-name {
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.125rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .credit-role {
+            color: #9ca3af;
+            font-size: 0.875rem;
+            margin: 0;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        .access-guest-view {
+            display: none;
+        }
+
+        .access-guest-view.visible {
+            display: block;
+        }
+
+        .access-user-view {
+            display: none;
+        }
+
+        .access-user-view.visible {
+            display: block;
+        }
+
+        .user-id-text {
+            color: #6b7280;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-id-text span {
+            color: #9ca3af;
+            font-family: 'Courier New', monospace;
         }
     </style>
 </head>
 <body class="acrylic-bg">
 
-    <div class="container mx-auto p-4 sm:p-8 max-w-4xl w-full">
-        <!-- Main Application Card -->
-        <div id="app-container" class="acrylic-card rounded-2xl p-6 md:p-12 transition-all duration-500">
+    <div class="container">
+        <div id="app-container" class="acrylic-card">
 
-            <header class="mb-8 text-center">
-                <h1 class="text-5xl font-extrabold tracking-tight text-white mb-2">Macobfuscator</h1>
-                <p class="text-xl font-light text-gray-300">The next generation of Lua protection.</p>
+            <header>
+                <h1>Macobfuscator</h1>
+                <p class="subtitle">The next generation of Lua protection.</p>
+                <div class="divider"></div>
             </header>
 
-            <!-- Tabs Navigation -->
-            <div class="flex border-b border-gray-700 mb-8">
-                <button id="tab-about" data-tab="about" class="tab-button py-3 px-6 text-lg font-medium transition duration-300 ease-in-out">
-                    About
-                </button>
-                <button id="tab-access" data-tab="access" class="tab-button py-3 px-6 text-lg font-medium transition duration-300 ease-in-out">
-                    Access
-                </button>
-                <button id="tab-credits" data-tab="credits" class="tab-button py-3 px-6 text-lg font-medium transition duration-300 ease-in-out">
-                    Credits
-                </button>
-                <!-- Dynamically visible "Obfuscator" tab -->
-                <button id="tab-obfuscator" data-tab="obfuscator" class="tab-button py-3 px-6 text-lg font-medium transition duration-300 ease-in-out hidden">
-                    Obfuscator
-                </button>
+            <div class="tab-navigation">
+                <button class="tab-button active" data-tab="about">About</button>
+                <button class="tab-button" data-tab="access">Access</button>
+                <button class="tab-button" data-tab="credits">Credits</button>
+                <button class="tab-button hidden" id="tab-obfuscator" data-tab="obfuscator">Obfuscator</button>
             </div>
 
-            <!-- Tab Content: About -->
-            <div id="content-about" class="tab-content">
-                <h2 class="text-3xl font-bold mb-4 text-white">The Power of Macobfuscator</h2>
-                <p class="text-gray-300 leading-relaxed text-lg">
-                    Macobfuscator is an upcoming, powerful obfuscation tool designed specifically for the Lua scripting language. Our proprietary techniques focus on delivering **100% functionality preservation**—your obfuscated code runs identically to the original, **guaranteed**, across all supported environments. We achieve this by using advanced metamorphic transformations and virtualization layers, ensuring your intellectual property is simultaneously secure and fully operational.
+            <!-- About Tab -->
+            <div id="content-about" class="tab-content active">
+                <h2>The Power of Macobfuscator</h2>
+                <p>
+                    Macobfuscator is an upcoming, powerful obfuscation tool designed specifically for the Lua scripting language. Our proprietary techniques focus on delivering <span class="highlight">100% functionality preservation</span>—your obfuscated code runs identically to the original, <span style="font-weight: 600;">guaranteed</span>, across all supported environments. We achieve this by using advanced metamorphic transformations and virtualization layers, ensuring your intellectual property is simultaneously secure and fully operational.
                 </p>
 
-                <!-- Core Features Section -->
-                <div class="mt-8 pt-6 border-t border-gray-700">
-                    <h3 class="text-2xl font-semibold mb-4 text-white">Core Obfuscation Features</h3>
-                    <ul class="space-y-2 text-gray-400 list-disc list-inside ml-4">
-                        <li>Custom Virtualization of Bytecode for maximum difficulty</li>
-                        <li>Advanced Control-Flow Flattening and Mutation techniques</li>
-                        <li>String Hiding and Encryption to protect sensitive data</li>
-                        <li>Metamorphic Code Generation for unique output every time</li>
-                        <li>Integrated Anti-Tamper and Debugger Detection systems</li>
-                        <li>Full compatibility with Lua 5.1, 5.2, 5.3, and Luau environments</li>
-                    </ul>
+                <div class="section-divider">
+                    <h3>Core Obfuscation Features</h3>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-card-content">
+                                <span class="feature-icon indigo">◆</span>
+                                <div class="feature-text">
+                                    <strong>Bytecode Virtualization</strong>
+                                    <p class="text-sm" style="color: #9ca3af; margin: 0.25rem 0 0 0;">Custom virtualization for maximum difficulty</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-content">
+                                <span class="feature-icon purple">◆</span>
+                                <div class="feature-text">
+                                    <strong>Control-Flow Flattening</strong>
+                                    <p class="text-sm" style="color: #9ca3af; margin: 0.25rem 0 0 0;">Advanced mutation techniques</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-content">
+                                <span class="feature-icon indigo">◆</span>
+                                <div class="feature-text">
+                                    <strong>String Encryption</strong>
+                                    <p class="text-sm" style="color: #9ca3af; margin: 0.25rem 0 0 0;">Protect sensitive data completely</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-content">
+                                <span class="feature-icon purple">◆</span>
+                                <div class="feature-text">
+                                    <strong>Metamorphic Generation</strong>
+                                    <p class="text-sm" style="color: #9ca3af; margin: 0.25rem 0 0 0;">Unique output every time</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-content">
+                                <span class="feature-icon indigo">◆</span>
+                                <div class="feature-text">
+                                    <strong>Anti-Tamper System</strong>
+                                    <p class="text-sm" style="color: #9ca3af; margin: 0.25rem 0 0 0;">Detect tampering automatically</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-card-content">
+                                <span class="feature-icon purple">◆</span>
+                                <div class="feature-text">
+                                    <strong>Full Compatibility</strong>
+                                    <p class="text-sm" style="color: #9ca3af; margin: 0.25rem 0 0 0;">Lua 5.1, 5.2, 5.3, & Luau</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <p class="mt-6 text-gray-400 text-sm">
-                    Stay tuned for announcements on the official release date!
-                </p>
+                <p class="text-sm italic" style="color: #9ca3af; margin-top: 2rem;">Stay tuned for announcements on the official release date!</p>
             </div>
 
-            <!-- Tab Content: Access -->
-            <div id="content-access" class="tab-content hidden text-center">
-                <div id="access-guest-view">
-                    <h2 class="text-3xl font-bold mb-8 text-white">Welcome, Guest!</h2>
-                    <p class="text-gray-400 mb-6">Sign up now to get instant access to the Obfuscator tab.</p>
-                    <div class="flex justify-center">
-                        <button id="sign-up-button-guest" class="bg-indigo-600 text-white font-bold text-lg py-3 px-8 rounded-xl shadow-lg transition duration-300 transform hover:scale-105 hover:bg-indigo-700">
+            <!-- Access Tab -->
+            <div id="content-access" class="tab-content">
+                <div class="access-guest-view visible">
+                    <h2 class="text-center">Welcome, Guest!</h2>
+                    <p class="text-center">Unlock instant access to the Obfuscator</p>
+                    <p class="text-center text-sm" style="color: #9ca3af; margin-top: -1rem; margin-bottom: 2rem;">Create a free account in seconds</p>
+                    <div class="button-container">
+                        <button id="sign-up-button-guest" class="gradient-button" style="padding: 0.75rem 2rem; font-size: 1.125rem;">
                             Sign Up & Get Instant Access
                         </button>
                     </div>
                 </div>
 
-                <div id="access-user-view" class="hidden">
-                    <h2 class="text-3xl font-bold mb-4 text-white">Welcome, <span id="current-username" class="text-indigo-400">User</span>!</h2>
-
-                    <!-- User Accepted View -->
-                    <div id="user-accepted-view">
-                        <h3 class="text-xl font-semibold mb-4 text-green-400">🎉 Access Granted Instantly!</h3>
-                        <p class="text-gray-300 mb-8">You can now use the Obfuscator tab.</p>
+                <div class="access-user-view">
+                    <div class="user-info">
+                        <p>Welcome Back!</p>
+                    </div>
+                    <div class="user-greeting">Welcome, <span class="accent-text" id="current-username">User</span>!</div>
+                    
+                    <div class="success-badge">
+                        <h3>✨ Access Granted!</h3>
+                        <p>You now have full access to the Obfuscator tool. Start protecting your code!</p>
                     </div>
 
-                    <!-- User Pending View (Hidden for this local version) -->
-                    <div id="user-pending-view" class="hidden"></div>
-                    
-                    <p class="text-sm text-gray-500 mt-6 mb-4">User ID: <span id="current-user-id"></span></p>
+                    <div class="user-id-text">ID: <span id="current-user-id"></span></div>
 
-                    <button id="logout-button" class="bg-red-600 text-white font-semibold text-base py-2 px-6 rounded-lg transition duration-300 hover:bg-red-700">
+                    <button id="logout-button" class="danger-button" style="width: 100%;">
                         Logout
                     </button>
                 </div>
             </div>
             
-            <!-- Tab Content: Credits -->
-            <div id="content-credits" class="tab-content hidden">
-                <h2 class="text-3xl font-bold mb-4 text-white">Project Acknowledgements</h2>
-                <div class="space-y-3 text-gray-300 text-lg">
-                    <p><strong class="text-white">aerolive</strong> - Project Concept & Vision</p>
-                    <p><strong class="text-white">INN1T</strong> - Design & Artistic Direction</p>
-                    <p><strong class="text-white">Gemini</strong> - Landing Page Development</p>
+            <!-- Credits Tab -->
+            <div id="content-credits" class="tab-content">
+                <h2>Project Acknowledgements</h2>
+                <div class="credits-grid">
+                    <div class="credit-card">
+                        <p class="credit-name" style="color: #818cf8;">aerolive</p>
+                        <p class="credit-role">Project Concept & Vision</p>
+                    </div>
+                    <div class="credit-card">
+                        <p class="credit-name" style="color: #c084fc;">INN1T</p>
+                        <p class="credit-role">Design & Artistic Direction</p>
+                    </div>
+                    <div class="credit-card">
+                        <p class="credit-name" style="color: #818cf8;">Gemini</p>
+                        <p class="credit-role">Landing Page Development</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Tab Content: Obfuscator (Hidden by Default) -->
-            <div id="content-obfuscator" class="tab-content hidden">
-                <h2 class="text-3xl font-bold mb-4 text-white">Macobfuscator Service</h2>
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <h3 class="text-2xl font-semibold text-yellow-400 mb-2">In Development</h3>
-                    <p class="text-gray-300 leading-relaxed">
-                        The core obfuscation service is currently under heavy development. We are focusing on rigorous testing to ensure 100% stability and full feature integration before deployment. 
-                    </p>
-                    <p class="text-gray-400 mt-4 text-sm">
-                        Thank you for your patience! Check back here for updates on the latest tool release.
-                    </p>
+            <!-- Obfuscator Tab -->
+            <div id="content-obfuscator" class="tab-content">
+                <h2>Macobfuscator Service</h2>
+                <div class="dev-badge">
+                    <div class="dev-badge-header">
+                        <span class="dev-emoji">⚙️</span>
+                        <div>
+                            <h3>Currently in Development</h3>
+                            <p>The core obfuscation service is undergoing rigorous testing to ensure 100% stability and complete feature integration. We're perfecting every detail to give you the most powerful Lua obfuscation tool available.</p>
+                            <p class="text-sm" style="color: #9ca3af; margin-top: 1rem;">Thank you for your patience! Check back soon for the latest updates.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
         </div>
     </div>
 
-    <!-- General Modal for Messages -->
-    <div id="general-modal" class="indev-modal-container fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
-        <div class="indev-modal-content acrylic-card p-8 max-w-sm w-full rounded-xl text-center">
-            <h3 id="modal-header" class="text-3xl font-bold text-white mb-4"></h3>
-            <p id="modal-body" class="text-gray-300 mb-6"></p>
-            <button id="close-modal" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition duration-300">
-                Close
-            </button>
+    <!-- General Modal -->
+    <div id="general-modal" class="modal-container hidden">
+        <div class="modal-overlay">
+            <div class="modal-content">
+                <h3 id="modal-header" class="modal-header"></h3>
+                <p id="modal-body" class="modal-body"></p>
+                <button id="close-modal" class="gradient-button" style="width: 100%;">Close</button>
+            </div>
         </div>
     </div>
     
     <!-- Sign Up Modal -->
-    <div id="signup-modal" class="indev-modal-container fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
-        <div class="indev-modal-content acrylic-card p-8 max-w-md w-full rounded-xl">
-            <h3 class="text-3xl font-bold text-white mb-6 text-center">Create Your Account</h3>
-            
-            <label for="username-input" class="block text-left text-gray-300 mb-2">Choose Username:</label>
-            <input type="text" id="username-input" placeholder="e.g., MacUser_01" class="w-full p-3 mb-4 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-indigo-500">
-            
-            <p id="signup-error-message" class="text-red-400 text-sm mb-4 text-left hidden"></p>
-            
-            <div class="flex justify-between space-x-4 mt-4">
-                <button id="submit-signup" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition duration-300">
-                    Register
-                </button>
-                <button id="close-signup-modal" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg transition duration-300">
-                    Cancel
-                </button>
+    <div id="signup-modal" class="modal-container hidden">
+        <div class="modal-overlay">
+            <div class="modal-content">
+                <h3 class="modal-header">Create Account</h3>
+                <p class="modal-subtitle">Join the revolution</p>
+                
+                <div class="form-group">
+                    <label class="form-label">Choose Username:</label>
+                    <input type="text" id="username-input" placeholder="e.g., MacUser_01" class="form-input">
+                    <div id="signup-error-message" class="error-message"></div>
+                </div>
+                
+                <div class="button-group">
+                    <button id="submit-signup" class="gradient-button">Register</button>
+                    <button id="close-signup-modal" class="secondary-button">Cancel</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        // --- LOCAL STORAGE KEYS ---
+    <script>
         const CURRENT_USER_KEY = 'macobf_current_user';
         const REGISTERED_USERNAMES_KEY = 'macobf_registered_usernames';
 
-        // --- GLOBAL STATE VARIABLES ---
-        let currentUser = null; // Stores the currently "logged in" profile object { id, username, isAccepted }
+        let currentUser = null;
 
-        // Profanity filter (simple list for demonstration)
         const PROFANITY_LIST = ['nude', 'fuck', 'shit', 'cunt', 'piss', 'nigger', 'faggot', 'bitch'];
 
-        // --- DOM ELEMENTS ---
+        // DOM Elements
         const tabButtons = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
         const tabObfuscator = document.getElementById('tab-obfuscator');
@@ -243,57 +829,33 @@
         const signupErrorMessage = document.getElementById('signup-error-message');
 
         const logoutButton = document.getElementById('logout-button');
-
-        const accessGuestView = document.getElementById('access-guest-view');
-        const accessUserView = document.getElementById('access-user-view');
+        const accessGuestView = document.querySelector('.access-guest-view');
+        const accessUserView = document.querySelector('.access-user-view');
         const currentUserElement = document.getElementById('current-username');
         const currentUserIdElement = document.getElementById('current-user-id');
-        const userPendingView = document.getElementById('user-pending-view');
-        const userAcceptedView = document.getElementById('user-accepted-view');
 
-
-        // --- UTILITY FUNCTIONS ---
-
-        /**
-         * Generates a simple unique ID (replaces Firebase UID).
-         * @returns {string}
-         */
         function generateLocalId() {
-            // Using crypto.randomUUID for a more standard, unique ID if available, falling back to a timestamp/random string.
             return (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('local-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 9));
         }
 
-        /**
-         * Retrieves the list of all registered usernames from localStorage.
-         * @returns {string[]}
-         */
         function getRegisteredUsernames() {
             try {
                 const storedUsernames = localStorage.getItem(REGISTERED_USERNAMES_KEY);
                 return storedUsernames ? JSON.parse(storedUsernames) : [];
             } catch (e) {
-                console.error("Error reading usernames from localStorage:", e);
+                console.error("Error reading usernames:", e);
                 return [];
             }
         }
 
-        /**
-         * Saves the list of all registered usernames to localStorage.
-         * @param {string[]} usernames
-         */
         function saveRegisteredUsernames(usernames) {
             try {
                 localStorage.setItem(REGISTERED_USERNAMES_KEY, JSON.stringify(usernames));
             } catch (e) {
-                console.error("Error writing usernames to localStorage:", e);
+                console.error("Error writing usernames:", e);
             }
         }
 
-        /**
-         * Shows a general modal with custom content.
-         * @param {string} header
-         * @param {string} body
-         */
         function showModal(header, body) {
             modalHeader.textContent = header;
             modalBody.innerHTML = body;
@@ -304,9 +866,6 @@
             }, 10);
         }
 
-        /**
-         * Hides the general modal.
-         */
         function hideModal() {
             generalModal.classList.remove('is-active');
             
@@ -315,37 +874,24 @@
             }, 300); 
         }
 
-        /**
-         * Displays or hides the Sign Up modal.
-         * @param {boolean} show
-         */
         function toggleSignupModal(show) {
             if (show) {
                 signupModal.classList.remove('hidden');
                 setTimeout(() => signupModal.classList.add('is-active'), 10);
-                signupErrorMessage.classList.add('hidden');
+                signupErrorMessage.classList.remove('show');
                 usernameInput.value = '';
+                usernameInput.focus();
             } else {
                 signupModal.classList.remove('is-active');
                 setTimeout(() => signupModal.classList.add('hidden'), 300);
             }
         }
 
-        /**
-         * Checks if a username contains any offensive words.
-         * @param {string} username 
-         * @returns {boolean}
-         */
         function isProfane(username) {
             const lowerUsername = username.toLowerCase();
             return PROFANITY_LIST.some(word => lowerUsername.includes(word));
         }
 
-        // --- CORE LOCAL AUTH FUNCTIONS ---
-
-        /**
-         * Initializes the user session from localStorage.
-         */
         function initializeLocalState() {
             try {
                 const storedUser = localStorage.getItem(CURRENT_USER_KEY);
@@ -355,167 +901,119 @@
                     currentUser = null;
                 }
             } catch (error) {
-                console.error("Error loading user state from localStorage:", error);
+                console.error("Error loading user state:", error);
                 currentUser = null;
             }
-            // Update UI immediately based on local state
             updateAccessUI(currentUser);
         }
         
-        /**
-         * Handles the sign-up process: username validation and profile creation.
-         */
         function handleSignup() {
             const username = usernameInput.value.trim();
-            signupErrorMessage.classList.add('hidden');
+            signupErrorMessage.classList.remove('show');
             
             if (!username) {
                 signupErrorMessage.textContent = 'Username cannot be empty.';
-                signupErrorMessage.classList.remove('hidden');
+                signupErrorMessage.classList.add('show');
                 return;
             }
-            // Simple length validation
             if (username.length < 3 || username.length > 20) {
-                 signupErrorMessage.textContent = 'Username must be between 3 and 20 characters.';
-                signupErrorMessage.classList.remove('hidden');
+                signupErrorMessage.textContent = 'Username must be between 3 and 20 characters.';
+                signupErrorMessage.classList.add('show');
                 return;
             }
 
             if (isProfane(username)) {
                 signupErrorMessage.textContent = 'Username contains offensive language.';
-                signupErrorMessage.classList.remove('hidden');
+                signupErrorMessage.classList.add('show');
                 return;
             }
 
-            // 1. Check for username uniqueness against locally stored list
             const registeredUsernames = getRegisteredUsernames();
             const lowerUsername = username.toLowerCase();
 
             if (registeredUsernames.includes(lowerUsername)) {
-                signupErrorMessage.textContent = 'Username is already taken. Please choose another.';
-                signupErrorMessage.classList.remove('hidden');
+                signupErrorMessage.textContent = 'Username is already taken.';
+                signupErrorMessage.classList.add('show');
                 return;
             }
 
-            // 2. Create the user profile with INSTANT acceptance
             const newUserId = generateLocalId();
             const newProfile = {
                 id: newUserId,
                 username: username,
-                isAccepted: true, // INSTANT ACCEPTANCE
+                isAccepted: true,
                 joinedAt: new Date().toISOString()
             };
 
-            // 3. Save the new profile and update the registered list
             currentUser = newProfile;
             localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newProfile));
             registeredUsernames.push(lowerUsername);
             saveRegisteredUsernames(registeredUsernames);
 
             toggleSignupModal(false);
-            showModal("Success!", `Welcome, ${username}! Access has been granted instantly.`);
+            showModal("Welcome!", `Account created! Access granted instantly.`);
             
-            // 4. Update UI
             updateAccessUI(currentUser);
         }
         
-        /**
-         * Logs the user out of the application by clearing local storage session.
-         */
         function handleLogout() {
             localStorage.removeItem(CURRENT_USER_KEY);
             currentUser = null;
             updateAccessUI(null);
-            showModal("Logged Out", "You have successfully logged out.");
+            showModal("See You Soon", "You have been logged out.");
         }
 
-        // --- UI RENDER/UPDATE FUNCTIONS ---
-
-        /**
-         * Updates the UI based on the user's profile state.
-         * @param {object | null} profile - The local user's profile data.
-         */
         function updateAccessUI(profile) {
-            // Determine the current view
             const isLoggedIn = !!profile;
             const isAccepted = profile?.isAccepted === true;
             const username = profile?.username || 'Guest';
 
-            // 1. Toggle Access View
             if (isLoggedIn) {
-                accessGuestView.classList.add('hidden');
-                accessUserView.classList.remove('hidden');
+                accessGuestView.classList.remove('visible');
+                accessUserView.classList.add('visible');
                 currentUserElement.textContent = username;
                 currentUserIdElement.textContent = profile.id;
-                
-                // Since acceptance is instant, we only show the accepted view
-                userPendingView.classList.add('hidden');
-                userAcceptedView.classList.remove('hidden');
             } else {
-                accessGuestView.classList.remove('hidden');
-                accessUserView.classList.add('hidden');
+                accessGuestView.classList.add('visible');
+                accessUserView.classList.remove('visible');
             }
 
-            // 2. Toggle Obfuscator Tab
             if (isAccepted) {
                 tabObfuscator.classList.remove('hidden');
             } else {
                 tabObfuscator.classList.add('hidden');
             }
             
-            // If the Obfuscator tab was selected and is now hidden (e.g., after logout), switch to the About tab
-            if (document.getElementById('content-obfuscator').classList.contains('active') && !isAccepted) {
+            const obfContent = document.getElementById('content-obfuscator');
+            if (obfContent.classList.contains('active') && !isAccepted) {
                 switchTab('about');
             }
         }
 
-        /**
-         * Handles the visual transition between tabs.
-         * @param {string} activeTabId 
-         */
         function switchTab(activeTabId) {
             const newActiveContent = document.getElementById(`content-${activeTabId}`);
             const currentActiveContent = document.querySelector('.tab-content.active');
-            const activeTab = document.getElementById(`tab-${activeTabId}`);
+            const activeTab = document.querySelector(`[data-tab="${activeTabId}"]`);
 
-            // Update button styles
             tabButtons.forEach(button => {
-                button.classList.remove('text-white', 'border-b-2', 'border-white', 'active');
-                button.classList.add('text-gray-500', 'hover:text-gray-300');
+                button.classList.remove('active');
             });
             if (activeTab) {
-                activeTab.classList.remove('text-gray-500', 'hover:text-gray-300');
-                activeTab.classList.add('text-white', 'border-b-2', 'border-white', 'active');
+                activeTab.classList.add('active');
             }
             
             if (currentActiveContent && currentActiveContent.id === newActiveContent.id) return;
             
-            // Hide all
-            tabContents.forEach(content => content.classList.add('hidden'));
+            tabContents.forEach(content => content.classList.remove('active'));
 
             if (newActiveContent) {
-                if (currentActiveContent) {
-                    currentActiveContent.style.opacity = '0';
-                    currentActiveContent.style.transform = 'translateY(10px)';
-                    currentActiveContent.classList.remove('active');
-                }
-
-                // Show new content
-                newActiveContent.classList.remove('hidden');
                 newActiveContent.classList.add('active');
-                
-                // Trigger reflow (offsetWidth) before applying styles for animation to work
-                void newActiveContent.offsetWidth; 
-                newActiveContent.style.opacity = '1';
-                newActiveContent.style.transform = 'translateY(0)';
             }
         }
 
-        // --- EVENT LISTENERS ---
-
         closeModalButton.addEventListener('click', hideModal);
         generalModal.addEventListener('click', (e) => {
-            if (e.target === generalModal) { hideModal(); }
+            if (e.target === generalModal.querySelector('.modal-overlay')) { hideModal(); }
         });
         
         signupButtonGuest.addEventListener('click', () => toggleSignupModal(true)); 
@@ -527,32 +1025,19 @@
 
         logoutButton.addEventListener('click', handleLogout);
         
-        // Tab Switching Listeners
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const tabId = button.getAttribute('data-tab');
-                // Only allow switching to Obfuscator if the tab is visible AND user is logged in
                 if (tabId === 'obfuscator' && tabObfuscator.classList.contains('hidden')) {
-                    showModal("Access Required", "You must sign up to access the Obfuscator tool.");
+                    showModal("Access Required", "Sign up to unlock the Obfuscator tool.");
                     return;
                 }
                 switchTab(tabId);
             });
         });
 
-        // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Set initial transition state
-            tabContents.forEach(content => {
-                content.classList.add('hidden'); 
-                content.style.opacity = '0';
-                content.style.transform = 'translateY(10px)';
-            });
-            
-            // Start local state loading and show the default tab
             initializeLocalState();
-            
-            // Show the default tab immediately (removed redundant timeout)
             switchTab('about'); 
         });
 
