@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Macobfuscator - Access & Obfuscator</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use Inter font family -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Custom CSS for the animated acrylic black background */
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #f3f4f6; /* Light gray text for dark background */
+            background-color: #000;
+        }
+
+        .acrylic-bg {
+            /* Subtle dark gradient animation for the background */
+            background: linear-gradient(-45deg, #1c1c1c, #000000, #333333, #000000);
+            background-size: 400% 400%;
+            animation: gradient-shift 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .acrylic-card {
+            /* Frosted glass effect for the main container */
+            background-color: rgba(255, 255, 255, 0.05); /* Slight white transparency */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px); /* Blur effect */
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+        
+        /* CSS for smooth transition when switching tab content */
+        .tab-content {
+            /* Setting transition properties here for the JS to use */
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            will-change: opacity, transform; /* Optimization */
+        }
+
+        /* --- Modal specific CSS for smooth appearance --- */
+        /* Modal container starts hidden and transparent */
+        .indev-modal-container {
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
+        /* State when modal is active (visible) */
+        .indev-modal-container.is-active {
+            opacity: 1;
+        }
+
+        /* Modal content starts slightly scaled down */
+        .indev-modal-content {
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Spring-like easing */
+            transform: scale(0.9);
+        }
+        /* Modal content scales up when active */
+        .is-active .indev-modal-content {
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="acrylic-bg">
+
+    <div class="container mx-auto p-4 sm:p-8 max-w-4xl w-full">
+        <!-- Main Application Card -->
+        <div id="app-container" class="acrylic-card rounded-2xl p-6 md:p-12 transition-all duration-500">
+
+            <header class="mb-8 text-center">
+                <h1 class="text-5xl font-extrabold tracking-tight text-white mb-2">Macobfuscator</h1>
+                <p class="text-xl font-light text-gray-300">The next generation of Lua protection.</p>
+            </header>
+
+            <!-- Tabs Navigation -->
+            <div class="flex border-b border-gray-700 mb-8">
+                <button id="tab-about" data-tab="about" class="tab-button py-3 px-6 text-lg font-medium transition duration-300 ease-in-out">
+                    About
+                </button>
+                <button id="tab-access" data-tab="access" class="tab-button py-3 px-6 text-lg font-medium transition duration-300 ease-in-out">
+                    Access
+                </button>
+                <button id="tab-credits" data-tab="credits" class="tab-button py-3 px-6 text-lg font-medium transition duration-300 ease-in-out">
+                    Credits
+                </button>
+                <!-- Dynamically visible "Obfuscator" tab -->
+                <button id="tab-obfuscator" data-tab="obfuscator" class="tab-button py-3 px-6 text-lg font-medium transition duration-300 ease-in-out hidden">
+                    Obfuscator
+                </button>
+            </div>
+
+            <!-- Tab Content: About -->
+            <div id="content-about" class="tab-content">
+                <h2 class="text-3xl font-bold mb-4 text-white">The Power of Macobfuscator</h2>
+                <p class="text-gray-300 leading-relaxed text-lg">
+                    Macobfuscator is an upcoming, powerful obfuscation tool designed specifically for the Lua scripting language. Our proprietary techniques focus on delivering **100% functionality preservation**—your obfuscated code runs identically to the original, **guaranteed**, across all supported environments. We achieve this by using advanced metamorphic transformations and virtualization layers, ensuring your intellectual property is simultaneously secure and fully operational.
+                </p>
+
+                <!-- Core Features Section -->
+                <div class="mt-8 pt-6 border-t border-gray-700">
+                    <h3 class="text-2xl font-semibold mb-4 text-white">Core Obfuscation Features</h3>
+                    <ul class="space-y-2 text-gray-400 list-disc list-inside ml-4">
+                        <li>Custom Virtualization of Bytecode for maximum difficulty</li>
+                        <li>Advanced Control-Flow Flattening and Mutation techniques</li>
+                        <li>String Hiding and Encryption to protect sensitive data</li>
+                        <li>Metamorphic Code Generation for unique output every time</li>
+                        <li>Integrated Anti-Tamper and Debugger Detection systems</li>
+                        <li>Full compatibility with Lua 5.1, 5.2, 5.3, and Luau environments</li>
+                    </ul>
+                </div>
+                <p class="mt-6 text-gray-400 text-sm">
+                    Stay tuned for announcements on the official release date!
+                </p>
+            </div>
+
+            <!-- Tab Content: Access -->
+            <div id="content-access" class="tab-content hidden text-center">
+                <div id="access-guest-view">
+                    <h2 class="text-3xl font-bold mb-8 text-white">Welcome, Guest!</h2>
+                    <p class="text-gray-400 mb-6">You need to sign up to request access and view the Obfuscator tab.</p>
+                    <div class="flex justify-center space-x-4">
+                        <button id="sign-up-button" class="bg-indigo-600 text-white font-bold text-lg py-3 px-8 rounded-xl shadow-lg transition duration-300 transform hover:scale-105 hover:bg-indigo-700">
+                            Sign Up
+                        </button>
+                        <button id="access-webhook-button" class="bg-white text-black font-extrabold text-lg py-3 px-8 rounded-xl shadow-lg transition duration-300 transform hover:scale-105 hover:shadow-white/50">
+                            Get Access
+                        </button>
+                    </div>
+                </div>
+
+                <div id="access-user-view" class="hidden">
+                    <h2 class="text-3xl font-bold mb-4 text-white">Welcome, <span id="current-username" class="text-indigo-400">User</span>!</h2>
+                    <p id="user-status-message" class="text-lg mb-6"></p>
+
+                    <!-- User Accepted View -->
+                    <div id="user-accepted-view" class="hidden">
+                        <h3 class="text-xl font-semibold mb-4 text-green-400">🎉 Access Granted!</h3>
+                        <p class="text-gray-300 mb-8">You can now use the Obfuscator tab. Your session is active.</p>
+                    </div>
+
+                    <!-- User Not Accepted View (Default) -->
+                    <div id="user-pending-view">
+                        <p class="text-gray-300 mb-8">Your access request is currently under review. Click 'Re-send Access Request' to send an alert to the admin team.</p>
+                        <button id="access-webhook-button-signedin" class="bg-white text-black font-extrabold text-lg py-3 px-8 rounded-xl shadow-lg transition duration-300 transform hover:scale-105 hover:shadow-white/50 mb-4">
+                            Re-send Access Request
+                        </button>
+                        <!-- Simulation Button for Acceptance (Dev only) -->
+                        <button id="manual-accept-button" class="bg-green-600 text-white font-bold text-lg py-3 px-8 rounded-xl shadow-lg transition duration-300 transform hover:scale-105 hover:bg-green-700">
+                            Manually Accept (Dev)
+                        </button>
+                    </div>
+
+                    <p class="text-sm text-gray-500 mt-6 mb-4">User ID: <span id="current-user-id"></span></p>
+
+                    <button id="logout-button" class="bg-red-600 text-white font-semibold text-base py-2 px-6 rounded-lg transition duration-300 hover:bg-red-700">
+                        Logout
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Credits -->
+            <div id="content-credits" class="tab-content hidden">
+                <h2 class="text-3xl font-bold mb-4 text-white">Project Acknowledgements</h2>
+                <div class="space-y-3 text-gray-300 text-lg">
+                    <p><strong class="text-white">aerolive</strong> - Project Concept & Vision</p>
+                    <p><strong class="text-white">INN1T</strong> - Design & Artistic Direction</p>
+                    <p><strong class="text-white">Gemini</strong> - Landing Page Development</p>
+                </div>
+            </div>
+
+            <!-- Tab Content: Obfuscator (Hidden by Default) -->
+            <div id="content-obfuscator" class="tab-content hidden">
+                <h2 class="text-3xl font-bold mb-4 text-white">Macobfuscator Service</h2>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <h3 class="text-2xl font-semibold text-yellow-400 mb-2">In Development</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        The core obfuscation service is currently under heavy development. We are focusing on rigorous testing to ensure 100% stability and full feature integration before deployment. 
+                    </p>
+                    <p class="text-gray-400 mt-4 text-sm">
+                        Thank you for your patience! Check back here for updates on the latest tool release.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- General Modal for Messages and Webhook Results -->
+    <div id="general-modal" class="indev-modal-container fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
+        <div class="indev-modal-content acrylic-card p-8 max-w-sm w-full rounded-xl text-center">
+            <h3 id="modal-header" class="text-3xl font-bold text-white mb-4"></h3>
+            <p id="modal-body" class="text-gray-300 mb-6"></p>
+            <button id="close-modal" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition duration-300">
+                Close
+            </button>
+        </div>
+    </div>
+    
+    <!-- Sign Up Modal -->
+    <div id="signup-modal" class="indev-modal-container fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
+        <div class="indev-modal-content acrylic-card p-8 max-w-md w-full rounded-xl">
+            <h3 class="text-3xl font-bold text-white mb-6 text-center">Create Your Account</h3>
+            
+            <label for="username-input" class="block text-left text-gray-300 mb-2">Choose Username:</label>
+            <input type="text" id="username-input" placeholder="e.g., MacUser_01" class="w-full p-3 mb-4 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-indigo-500">
+            
+            <p id="signup-error-message" class="text-red-400 text-sm mb-4 text-left hidden"></p>
+            
+            <div class="flex justify-between space-x-4 mt-4">
+                <button id="submit-signup" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition duration-300">
+                    Register
+                </button>
+                <button id="close-signup-modal" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg transition duration-300">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+
+        // Set Firebase Log Level to Debug
+        setLogLevel('Debug');
+
+        // --- GLOBAL VARIABLES ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let app, db, auth;
+        let userId = null;
+        let isAuthReady = false;
+        let userProfileListener = null;
+
+        // Profanity filter (simple list for demonstration)
+        const PROFANITY_LIST = ['nude', 'fuck', 'shit', 'cunt', 'piss', 'nigger', 'faggot', 'bitch'];
+
+        // --- DOM ELEMENTS ---
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const tabObfuscator = document.getElementById('tab-obfuscator');
+        
+        const generalModal = document.getElementById('general-modal');
+        const modalHeader = document.getElementById('modal-header');
+        const modalBody = document.getElementById('modal-body');
+        const closeModalButton = document.getElementById('close-modal');
+
+        const signupModal = document.getElementById('signup-modal');
+        const signupButton = document.getElementById('sign-up-button');
+        const closeSignupModalButton = document.getElementById('close-signup-modal');
+        const usernameInput = document.getElementById('username-input');
+        const submitSignupButton = document.getElementById('submit-signup');
+        const signupErrorMessage = document.getElementById('signup-error-message');
+
+        const accessWebhookButtonGuest = document.getElementById('access-webhook-button');
+        const accessWebhookButtonUser = document.getElementById('access-webhook-button-signedin');
+        const manualAcceptButton = document.getElementById('manual-accept-button');
+        const logoutButton = document.getElementById('logout-button');
+
+        const accessGuestView = document.getElementById('access-guest-view');
+        const accessUserView = document.getElementById('access-user-view');
+        const currentUserElement = document.getElementById('current-username');
+        const currentUserIdElement = document.getElementById('current-user-id');
+        const userPendingView = document.getElementById('user-pending-view');
+        const userAcceptedView = document.getElementById('user-accepted-view');
+
+        // The webhook URL
+        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1441754194007687169/Z4ugIucE_4GOGaEk1lRog1gpRVYS2st-KWZVuVHy9mwouFxZ9z5deZYMJ-OPo3ovapao';
+
+
+        // --- UTILITY FUNCTIONS ---
+
+        /**
+         * Shows a general modal with custom content.
+         * @param {string} header
+         * @param {string} body
+         */
+        function showModal(header, body) {
+            modalHeader.textContent = header;
+            modalBody.innerHTML = body;
+            
+            generalModal.classList.remove('hidden');
+            setTimeout(() => {
+                generalModal.classList.add('is-active'); 
+            }, 10);
+        }
+
+        /**
+         * Hides the general modal.
+         */
+        function hideModal() {
+            generalModal.classList.remove('is-active');
+            
+            setTimeout(() => {
+                generalModal.classList.add('hidden');
+            }, 300); 
+        }
+
+        /**
+         * Displays or hides the Sign Up modal.
+         * @param {boolean} show
+         */
+        function toggleSignupModal(show) {
+            if (show) {
+                signupModal.classList.remove('hidden');
+                setTimeout(() => signupModal.classList.add('is-active'), 10);
+                signupErrorMessage.classList.add('hidden');
+                usernameInput.value = '';
+            } else {
+                signupModal.classList.remove('is-active');
+                setTimeout(() => signupModal.classList.add('hidden'), 300);
+            }
+        }
+
+        /**
+         * Checks if a username contains any offensive words.
+         * @param {string} username 
+         * @returns {boolean}
+         */
+        function isProfane(username) {
+            const lowerUsername = username.toLowerCase();
+            return PROFANITY_LIST.some(word => lowerUsername.includes(word));
+        }
+
+        // --- FIREBASE CORE FUNCTIONS ---
+
+        /**
+         * Initializes Firebase and sets up the auth listener.
+         */
+        async function initializeFirebase() {
+            try {
+                if (!app) {
+                    app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+                }
+
+                // Sign in anonymously or with custom token
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Set up auth state listener
+                onAuthStateChanged(auth, (user) => {
+                    userId = user ? user.uid : null;
+                    isAuthReady = true;
+                    console.log('Auth State Changed. User ID:', userId);
+
+                    // Handle admin acceptance check first, as it's an external trigger
+                    handleAdminAcceptance();
+
+                    if (user) {
+                        setupUserProfileListener(userId);
+                    } else {
+                        // User logged out, clear UI state
+                        updateAccessUI(null);
+                        cleanupUserProfileListener();
+                    }
+                });
+
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                showModal("Initialization Error", "Failed to connect to the database. Check console for details.");
+            }
+        }
+        
+        /**
+         * Handles acceptance logic triggered externally via the admin link in the webhook.
+         * This runs on page load if the URL contains the admin parameters.
+         */
+        async function handleAdminAcceptance() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const adminAccept = urlParams.get('admin_accept');
+            const targetUid = urlParams.get('uid');
+
+            if (adminAccept === 'true' && targetUid) {
+                console.log(`Admin acceptance link detected for UID: ${targetUid}`);
+
+                // 1. Clean the URL immediately to prevent re-triggering on refresh
+                history.replaceState(null, '', window.location.pathname);
+                
+                try {
+                    // Use a dedicated doc reference for the target user
+                    const userDocRef = doc(db, `artifacts/${appId}/users/${targetUid}/profiles/main`);
+                    const userSnap = await getDoc(userDocRef);
+
+                    if (userSnap.exists()) {
+                        await setDoc(userDocRef, { isAccepted: true }, { merge: true });
+                        
+                        const username = userSnap.data().username || 'a user';
+                        
+                        // Show a special modal confirming the action
+                        showModal(
+                            "✅ User Accepted!", 
+                            `You have granted access to **${username}** (UID: ${targetUid}). <br><br>The user can now see the Obfuscator tab.`
+                        );
+                    } else {
+                         showModal(
+                            "User Not Found", 
+                            `Could not find a profile for UID: ${targetUid}. Acceptance failed.`
+                        );
+                    }
+
+                } catch (error) {
+                    console.error("External Acceptance Failed:", error);
+                    showModal("Error", "Failed to update user profile in Firestore. Check security rules or console.");
+                }
+            }
+        }
+
+
+        /**
+         * Subscribes to the user's profile document for real-time updates.
+         * @param {string} uid The Firebase user ID.
+         */
+        function setupUserProfileListener(uid) {
+            cleanupUserProfileListener();
+
+            const userDocRef = doc(db, `artifacts/${appId}/users/${uid}/profiles/main`);
+            
+            userProfileListener = onSnapshot(userDocRef, (docSnap) => {
+                const profile = docSnap.exists() ? docSnap.data() : null;
+                updateAccessUI(profile);
+            }, (error) => {
+                console.error("Error listening to user profile:", error);
+            });
+        }
+
+        /**
+         * Unsubscribes the user profile listener.
+         */
+        function cleanupUserProfileListener() {
+            if (userProfileListener) {
+                userProfileListener();
+                userProfileListener = null;
+            }
+        }
+
+        /**
+         * Handles the sign-up process: username validation and profile creation.
+         */
+        async function handleSignup() {
+            const username = usernameInput.value.trim();
+            signupErrorMessage.classList.add('hidden');
+            
+            if (!username) {
+                signupErrorMessage.textContent = 'Username cannot be empty.';
+                signupErrorMessage.classList.remove('hidden');
+                return;
+            }
+            if (isProfane(username)) {
+                signupErrorMessage.textContent = 'Username contains offensive language.';
+                signupErrorMessage.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                // 1. Check for username uniqueness
+                const usernameRef = doc(db, `artifacts/${appId}/public/data/usernames/${username.toLowerCase()}`);
+                const usernameSnap = await getDoc(usernameRef);
+
+                if (usernameSnap.exists()) {
+                    signupErrorMessage.textContent = 'Username is already taken. Please choose another.';
+                    signupErrorMessage.classList.remove('hidden');
+                    return;
+                }
+
+                // 2. Create the user profile
+                const uid = auth.currentUser.uid;
+                const userDocRef = doc(db, `artifacts/${appId}/users/${uid}/profiles/main`);
+                
+                await setDoc(userDocRef, {
+                    username: username,
+                    isAccepted: false,
+                    joinedAt: new Date().toISOString()
+                });
+                
+                // 3. Reserve the username in the public collection
+                await setDoc(usernameRef, { uid: uid });
+
+                toggleSignupModal(false);
+                showModal("Success!", `Welcome, ${username}! You are signed up. Your access request is pending.`);
+                // The onSnapshot listener will update the UI automatically.
+
+            } catch (error) {
+                console.error("Signup failed:", error);
+                signupErrorMessage.textContent = 'Registration failed. See console for details.';
+                signupErrorMessage.classList.remove('hidden');
+            }
+        }
+        
+        /**
+         * Toggles the user's acceptance status (for the dev button).
+         */
+        async function toggleAcceptance(isAccepted) {
+            if (!userId) return;
+
+            try {
+                const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/profiles/main`);
+                await setDoc(userDocRef, { isAccepted: isAccepted }, { merge: true });
+
+                showModal(
+                    isAccepted ? "Access Granted!" : "Access Revoked!",
+                    `User profile updated. The Obfuscator tab is now ${isAccepted ? 'visible' : 'hidden'}.`
+                );
+            } catch (error) {
+                console.error("Failed to update acceptance status:", error);
+                showModal("Error", "Could not change acceptance status in Firestore.");
+            }
+        }
+        
+        /**
+         * Logs the user out of the application.
+         */
+        async function handleLogout() {
+            try {
+                await signOut(auth);
+                // Auth listener handles UI update
+                showModal("Logged Out", "You have successfully logged out.");
+            } catch (error) {
+                console.error("Logout failed:", error);
+                showModal("Logout Error", "Failed to log out. See console.");
+            }
+        }
+
+        // --- WEBHOOK FUNCTION ---
+
+        /**
+         * Attempts to send a POST request to the Discord webhook.
+         * @param {string} buttonId - The ID of the button to update its state.
+         * @param {string} username - The username of the requester.
+         */
+        async function sendWebhook(buttonId, username) {
+            const button = document.getElementById(buttonId);
+            
+            button.textContent = 'Sending...';
+            button.disabled = true;
+            
+            // Build the Admin Acceptance URL
+            const adminAcceptUrl = `${window.location.origin}${window.location.pathname}?admin_accept=true&uid=${userId}`;
+
+            const content = username 
+                ? `**ACCESS REQUESTED:** User **${username}** (UID: \`${userId}\`) has requested access.`
+                : `**ACCESS REQUESTED:** An anonymous guest has clicked the access button.`;
+                
+            // Use Discord Embeds for a cleaner, actionable message
+            const payload = {
+                username: 'Macobfuscator Access Bot',
+                embeds: [{
+                    title: "🔔 NEW ACCESS REQUEST PENDING",
+                    description: `A signed-up user is requesting access to the Macobfuscator service.`,
+                    color: 3447003, // Blue color
+                    fields: [
+                        { name: "Username", value: username, inline: true },
+                        { name: "User ID (UID)", value: userId, inline: true },
+                        { name: "Action", value: `[✅ Click Here to ACCEPT User](${adminAcceptUrl})`, inline: false }
+                    ],
+                    footer: {
+                        text: "Clicking the link will instantly grant access via Firestore."
+                    },
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok || response.status === 204) {
+                    showModal(
+                        "Access Request Sent!",
+                        `Your request was successfully submitted to the admin team via Discord. They can now use the admin link in Discord to accept you.`
+                    );
+                } else {
+                    showModal(
+                        "Request Failed (Server Error)",
+                        `The webhook failed with status ${response.status}.`
+                    );
+                }
+
+            } catch (error) {
+                console.error('Webhook Fetch Error:', error);
+                showModal(
+                    "Request Failed (Client Error)",
+                    `A network error occurred. Please try again. (Console details available)`
+                );
+            } finally {
+                // Determine which button to reset (based on if the user is signed in)
+                const resetButton = document.getElementById(buttonId); 
+                if (resetButton.id === 'access-webhook-button') {
+                     resetButton.textContent = 'Get Access';
+                } else {
+                     resetButton.textContent = 'Re-send Access Request';
+                }
+                resetButton.disabled = false;
+            }
+        }
+
+        // --- UI RENDER/UPDATE FUNCTIONS ---
+
+        /**
+         * Updates the UI based on the user's profile state.
+         * @param {object | null} profile - The user's profile data from Firestore.
+         */
+        function updateAccessUI(profile) {
+            // Determine the current view
+            const isLoggedIn = !!auth.currentUser;
+            const hasProfile = !!profile;
+            const isAccepted = profile?.isAccepted === true;
+            const username = profile?.username || 'Guest';
+
+            // 1. Toggle Access View
+            if (isLoggedIn && hasProfile) {
+                accessGuestView.classList.add('hidden');
+                accessUserView.classList.remove('hidden');
+                currentUserElement.textContent = username;
+                currentUserIdElement.textContent = userId;
+            } else {
+                accessGuestView.classList.remove('hidden');
+                accessUserView.classList.add('hidden');
+            }
+
+            // 2. Toggle Obfuscator Tab and User Status
+            if (isAccepted) {
+                tabObfuscator.classList.remove('hidden');
+                userPendingView.classList.add('hidden');
+                userAcceptedView.classList.remove('hidden');
+            } else {
+                tabObfuscator.classList.add('hidden');
+                userPendingView.classList.remove('hidden');
+                userAcceptedView.classList.add('hidden');
+            }
+            
+            // If the Obfuscator tab was selected and is now hidden, switch to the About tab
+            if (document.getElementById('content-obfuscator').classList.contains('active') && !isAccepted) {
+                switchTab('about');
+            }
+        }
+
+        /**
+         * Handles the visual transition between tabs.
+         * @param {string} activeTabId 
+         */
+        function switchTab(activeTabId) {
+            const newActiveContent = document.getElementById(`content-${activeTabId}`);
+            const currentActiveContent = document.querySelector('.tab-content.active'); // Use .active class instead of :not(.hidden)
+            const activeTab = document.getElementById(`tab-${activeTabId}`);
+
+            // Update button styles
+            tabButtons.forEach(button => {
+                button.classList.remove('text-white', 'border-b-2', 'border-white', 'active');
+                button.classList.add('text-gray-500', 'hover:text-gray-300');
+            });
+            if (activeTab) {
+                activeTab.classList.remove('text-gray-500', 'hover:text-gray-300');
+                activeTab.classList.add('text-white', 'border-b-2', 'border-white', 'active');
+            }
+            
+            if (currentActiveContent && currentActiveContent.id === newActiveContent.id) return;
+            
+            // Hide all
+            tabContents.forEach(content => content.classList.add('hidden'));
+
+            if (newActiveContent) {
+                if (currentActiveContent) {
+                    currentActiveContent.style.opacity = '0';
+                    currentActiveContent.style.transform = 'translateY(10px)';
+                    currentActiveContent.classList.remove('active');
+                }
+
+                // Show new content
+                newActiveContent.classList.remove('hidden');
+                newActiveContent.classList.add('active');
+                
+                // Trigger reflow (offsetWidth) before applying styles for animation to work
+                void newActiveContent.offsetWidth; 
+                newActiveContent.style.opacity = '1';
+                newActiveContent.style.transform = 'translateY(0)';
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+
+        closeModalButton.addEventListener('click', hideModal);
+        generalModal.addEventListener('click', (e) => {
+            if (e.target === generalModal) { hideModal(); }
+        });
+        
+        signupButton.addEventListener('click', () => toggleSignupModal(true));
+        closeSignupModalButton.addEventListener('click', () => toggleSignupModal(false));
+        submitSignupButton.addEventListener('click', handleSignup);
+        usernameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleSignup();
+        });
+
+        logoutButton.addEventListener('click', handleLogout);
+        
+        // Manual Acceptance Button (Dev/Simulation)
+        manualAcceptButton.addEventListener('click', () => toggleAcceptance(true));
+
+        // Webhook buttons
+        accessWebhookButtonGuest.addEventListener('click', () => sendWebhook(accessWebhookButtonGuest.id, 'Guest'));
+        accessWebhookButtonUser.addEventListener('click', async () => {
+            const profileSnap = await getDoc(doc(db, `artifacts/${appId}/users/${userId}/profiles/main`));
+            const username = profileSnap.data()?.username || 'Signed-in User';
+            sendWebhook(accessWebhookButtonUser.id, username);
+        });
+
+        // Tab Switching Listeners
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                // Only allow switching to Obfuscator if the tab is visible
+                if (tabId === 'obfuscator' && tabObfuscator.classList.contains('hidden')) {
+                    showModal("Access Required", "You must be accepted to access the Obfuscator tool.");
+                    return;
+                }
+                switchTab(tabId);
+            });
+        });
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set initial transition state
+            tabContents.forEach(content => {
+                content.classList.add('hidden'); 
+                content.style.opacity = '0';
+                content.style.transform = 'translateY(10px)';
+            });
+            
+            // Start Firebase and show the default tab
+            initializeFirebase();
+            
+            // Wait a very small delay (50ms) to ensure the initial 'About' content animates in
+            setTimeout(() => {
+                switchTab('about');
+            }, 50); 
+        });
+
+    </script>
+
+</body>
+</html>
